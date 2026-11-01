@@ -1,5 +1,5 @@
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=7';
+import * as THREE from './three.module.min.js?v=8';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -199,8 +199,6 @@ const CSS = `
 .kg-card{font-size:16px}.kg-card p{line-height:1.55}
 .kg-close{position:sticky;top:0;float:right;width:44px;height:44px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
 .kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 17px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
-.kg-qr{margin:10px auto;width:200px;height:200px;border-radius:16px;border:3px dashed var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:repeating-linear-gradient(45deg,#00000008 0 10px,#0000 10px 20px)}
-.kg-qr b{font-size:18px;color:var(--accent)}.kg-qr span{font-size:13px;opacity:.75;text-align:center;padding:0 12px}
 .kg-tut{position:absolute;inset:0;background:#000b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:auto;z-index:25;text-align:center;padding:24px;font-size:19px;line-height:1.5}
 .kg-tut .g{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}.kg-tut .g div{background:#ffffff1a;border-radius:16px;padding:16px;width:min(42vw,220px)}.kg-tut .g i{display:block;font-style:normal;font-size:40px}
 @media (min-width:900px){.kg-acts .row{max-width:520px}}
@@ -330,7 +328,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=7', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=8', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -399,7 +397,9 @@ export function shareInvite(ui, { name, text, place }) {
   ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:13px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
   <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`);
 }
-export function refGreeting(ui, fmt) { const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => ui.toast(fmt(r.slice(0, 20)), 5000), 1500); }
+/* bỏ link, số điện thoại, ký tự lạ; tối đa 20 ký tự */
+export function cleanName(t = '') { return String(t).replace(/https?:\/\/\S+|www\.\S+|\S+\.(com|vn|net|org|me|ly|io)\S*/gi, '').replace(/[+\d][\d .\-]{6,}\d/g, '').replace(/[<>"'`&\\{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+export function refGreeting(ui, fmt) { const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => { const c = cleanName(r); if (c) ui.toast(fmt(c), 5000); }, 1500); }
 export function leafPatch(W, { center, radius, count = 50, colors = ['#b5803a', '#8f6a2c', '#c99a4a', '#7b5a28'], onDone, sound }) {
   const g = new THREE.PlaneGeometry(0.22, 0.12); const leaves = [];
   const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.9 }), count); im.receiveShadow = true;
@@ -432,9 +432,8 @@ export function reader(ui, { title, sub, lines, beat = 2.2, onLine, onEnd }) {
 }
 export function stats(ui, id) { const k = 'kg_stats_' + id; let s = {}; try { s = JSON.parse(localStorage.getItem(k)) || {}; } catch { } return { s, add(n, v = 1) { s[n] = (s[n] || 0) + v; localStorage.setItem(k, JSON.stringify(s)); return s[n]; } }; }
 
-/* ---------------- công đức QR placeholder + Bè Gỗ link ---------------- */
+/* ---------------- Bè Gỗ link ---------------- */
 export const BEGO_URL = 'https://facebook.com/begotrensong';
 export function begoButton(text = 'Ghé Bè Gỗ Trên Sông') { return `<a class="kg-bego" href="${BEGO_URL}" target="_blank" rel="noopener">🪵 ${text} ↗</a>`; }
-export function qrPlaceholder(note = 'Mã QR chuyển khoản công đức đang được chuẩn bị') { return `<div class="kg-qr" role="img" aria-label="Sắp có mã QR"><span style="font-size:40px">▦</span><b>Sắp có mã QR</b><span>${note}</span></div>`; }
 export function doneCard(ui, { title = 'Hoàn thành', msg = '', icon = '🌸' }) { ui.modal(`<h2>${icon} ${title}</h2><p style="text-align:center">${msg}</p>${begoButton()}<button class="kg-btn" style="width:100%;margin-top:8px" onclick="this.closest('.kg-modal').style.display='none'">Tiếp tục</button>`); }
 export const MOVE_TUT = isMobile ? [['👈', 'Đặt ngón tay bên <b>trái</b> màn hình và kéo để đi'], ['👉', 'Vuốt bên <b>phải</b> màn hình để xoay nhìn'], ['👆', 'Chạm nút lớn phía dưới để tương tác']] : [['⌨️', 'Phím <b>W A S D</b> hoặc mũi tên để đi'], ['🖱️', 'Kéo chuột để xoay nhìn, lăn chuột để xa/gần'], ['E', 'Phím <b>E</b> để tương tác · <b>Esc</b> để đóng hộp thoại']];

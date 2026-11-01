@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=7';
-import { dailyTasks } from '../shared/daily.js?v=7';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=8';
+import { dailyTasks } from '../shared/daily.js?v=8';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
 const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });

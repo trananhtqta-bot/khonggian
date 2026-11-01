@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=7';
-import { dailyTasks } from '../shared/daily.js?v=7';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=8';
+import { dailyTasks } from '../shared/daily.js?v=8';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
@@ -165,7 +165,6 @@ const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</
 icons('🗺️', 'Sơ đồ', () => mapView(W, ui, [{ label: 'Cổng trường', desc: 'Nơi mẹ đưa bé tới', icon: '🏫', pos: [-1.6, 10.5], yaw: Math.PI }, { label: 'Lớp học', desc: 'Bảng đen, bàn ghế, cô Hiền', icon: '📚', pos: [0, -16.6], yaw: Math.PI }, { label: 'Gốc phượng', desc: 'Ghế đá dưới tán hoa đỏ', icon: '🌳', pos: [PHUONG.x + 2.4, PHUONG.z + 2], yaw: -2.3 }, { label: 'Sân chơi', desc: 'Xích đu, cầu trượt', icon: '🛝', pos: [SWING.x + 1, SWING.z + 3], yaw: Math.PI }, { label: 'Trống trường', desc: 'Đánh trống chuyển giờ', icon: '🥁', pos: [DRUM.x, DRUM.z + 2], yaw: Math.PI }, { label: 'Vườn hoa & bàn ăn', desc: 'Tưới cây, ăn trưa', icon: '🌼', pos: [BED.x + 3.5, BED.z + 2], yaw: Math.PI }], 'Sơ đồ trường'));
 icons('🌸', 'Hoa bé ngoan', () => { drawChart(); ui.modal(`<h2>Bông hoa bé ngoan</h2><p style="text-align:center;font-size:40px;margin:6px">${'🌸'.repeat(Math.min(10, flowersSt())) || '·'}</p><p style="text-align:center">Bé có <b>${flowersSt()}</b> bông · ${flowersSt() >= 10 ? 'Phiếu bé ngoan tuần này! 🎖️' : `còn ${10 - flowersSt()} bông nữa là được phiếu bé ngoan`}</p><p style="font-size:13px;opacity:.7;text-align:center">Kiếm hoa: ngồi học, giơ tay, hát đồng dao, tưới cây, trực nhật, ăn hết cơm</p>`); });
 icons('💌', 'Mời bạn', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} rủ bạn về lại lớp mẫu giáo ngày xưa · đánh trống trường, hát Nu na nu nống!`, place: 'maugiao' }));
-icons('🎁', 'Ủng hộ', () => ui.modal(`<h2>Ủng hộ Bè Gỗ</h2><p style="text-align:center">Thích lớp học này? Mời cô nuôi một ly trà đá 🧋</p>${qrPlaceholder('Mã QR SePay sẽ được cập nhật tại đây trong thời gian tới')}<p style="text-align:center;font-size:14px;opacity:.75">Hoàn toàn tự nguyện</p>${begoButton()}`));
 icons('🔊', 'Âm thanh', b => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.stopMusic(); S.music({ scale: [0, 2, 4, 7, 9], root: 392, beat: 0.42, inst: 'pluck', rest: 0.25 }); }
 
