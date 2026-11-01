@@ -1,0 +1,70 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="data:,"><title>Tri Ân Liệt Sĩ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;background:#151413;font-family:Georgia,"Times New Roman",serif;color:#efe6d4;overflow:hidden}
+#app{position:relative;height:100dvh;max-width:calc(100dvh*9/16);margin:0 auto;overflow:hidden;background:url(bg.jpg) center/cover}
+#app:before{content:"";position:absolute;inset:0;background:linear-gradient(#0000 40%,#0006);pointer-events:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.top{position:absolute;top:0;left:0;right:0;padding:16px;text-align:center;background:linear-gradient(#141210d0,#14121000)}
+.top h1{font-size:24px;font-weight:normal;letter-spacing:3px;color:#f3e3bf}.top p{font-size:13px;color:#cfc2a8;margin-top:4px;font-style:italic}
+.bar{position:absolute;left:10px;right:10px;bottom:22px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+button{border:1px solid #cdb98f88;background:#1e1b17cc;color:#efe2c4;border-radius:6px;padding:10px 12px;font-family:inherit;font-size:14px;cursor:pointer}
+button:active{background:#3a3226}
+#hint{position:absolute;left:0;right:0;top:86px;text-align:center;font-size:13px;color:#e8dcc0;opacity:0;transition:opacity 1.2s;text-shadow:0 1px 3px #000}
+.modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000a;z-index:5}
+.card{width:86%;max-height:80%;overflow:auto;background:#24201b;border:1px solid #a89268;padding:20px;text-align:center}
+.card h2{font-weight:normal;letter-spacing:2px;color:#f3e3bf;margin-bottom:12px}
+textarea{width:100%;height:90px;background:#141210;color:#efe6d4;border:1px solid #6f6148;padding:8px;font-family:inherit;font-size:15px}
+.msg{border-bottom:1px solid #4a4031;padding:10px 4px;font-size:15px;line-height:1.5;font-style:italic}.msg b{display:block;font-style:normal;font-size:12px;color:#b8a57e;margin-top:3px}
+#start{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#141210e6;text-align:center;padding:30px;gap:14px}
+#start h1{font-weight:normal;letter-spacing:4px;font-size:28px;color:#f3e3bf}#start p{font-size:15px;line-height:1.6;color:#d6c9ad;font-style:italic}
+</style></head><body><div id="app">
+<canvas id="c"></canvas>
+<div class="top"><h1>TRI ÂN LIỆT SĨ</h1><p>“Uống nước nhớ nguồn” · <span id="cnt"></span></p></div><div id="hint"></div>
+<div class="bar"><button id="bH">Thắp hương</button><button id="bF">Đặt hoa</button><button id="bQ">Quét dọn</button><button id="bV">Viết lời tri ân</button><button id="bW">Bức tường tri ân</button></div>
+<div class="modal" id="mV"><div class="card"><h2>Lời tri ân</h2><textarea id="tv" maxlength="200" placeholder="Xin kính cẩn nghiêng mình…"></textarea><input id="tn" maxlength="30" placeholder="Tên của bạn (không bắt buộc)" style="width:100%;margin-top:8px;padding:8px;background:#141210;color:#efe6d4;border:1px solid #6f6148;font-family:inherit"><div style="margin-top:12px;display:flex;gap:8px;justify-content:center"><button id="sv">Gửi lên bức tường</button><button id="cx">Đóng</button></div></div></div>
+<div class="modal" id="mW"><div class="card"><h2>Bức tường tri ân</h2><div id="wall"></div><button id="cw" style="margin-top:12px">Đóng</button></div></div>
+<div id="start"><h1>TRI ÂN LIỆT SĨ</h1><p>Nơi đây yên nghỉ những người con đã ngã xuống cho Tổ quốc.<br>Xin hãy giữ lòng thành kính, lặng lẽ thắp nén hương tưởng nhớ.</p><button id="go">Vào viếng</button></div>
+</div>
+<script>
+const $=i=>document.getElementById(i),cv=$('c'),x=cv.getContext('2d');let W,H;function rs(){const d=devicePixelRatio||1,r=cv.getBoundingClientRect();W=cv.width=r.width*d;H=cv.height=r.height*d}addEventListener('resize',rs);rs();
+// focus grave: foreground headstone (normalized base point)
+const G={x:.59,y:.76};let inc=0,flo=0,sm=[],leaves=[],sweeping=false,fire=[];
+for(let i=0;i<60;i++)leaves.push({x:G.x+(Math.random()-.5)*.28,y:G.y+(Math.random()-.2)*.06,r:Math.random()*6,c:['#7a5a2e','#8c6a34','#5e4a28','#9a7a40'][i%4]});
+function hint(s){const h=$('hint');h.textContent=s;h.style.opacity=1;clearTimeout(hint.t);hint.t=setTimeout(()=>h.style.opacity=0,3500)}
+function im(nx,ny){const ar=720/1280,r=W/H;let s,ox=0,oy=0;if(r<ar){s=H;ox=(W-H*ar)/2;return[ox+nx*H*ar,ny*H]}return[nx*W,(H-W/ar)/2+ny*W/ar]}
+let t0=performance.now();function frame(now){const tm=(now-t0)/1000;x.clearRect(0,0,W,H);const [gx,gy]=im(G.x,G.y),u=W/100;
+// fireflies / candle dust, slow
+fire.forEach(f=>{f.y-=.15;f.x+=Math.sin(tm*.5+f.p)*.3;const a=(Math.sin(tm+f.p)+1)/2*.6;x.fillStyle=`rgba(255,214,140,${a})`;x.beginPath();x.arc(f.x,f.y,1.6,0,7);x.fill();if(f.y<H*.3)f.y=H*.9});
+leaves.forEach(l=>{x.fillStyle=l.c;x.beginPath();x.ellipse(...im(l.x,l.y),u*.9,u*.45,l.r,0,7);x.fill()});
+// flowers (cúc trắng / vàng) at base
+for(let i=0;i<flo;i++){const fx=gx+(i%2?1:-1)*u*(4+Math.floor(i/2)*2.2),fy=gy-u*1;x.strokeStyle='#3e5a2a';x.lineWidth=u*.3;x.beginPath();x.moveTo(fx,fy+u*2);x.lineTo(fx,fy-u*3);x.stroke();for(let k=0;k<10;k++){x.fillStyle=i%3==2?'#e8c45a':'#f2eee4';x.beginPath();x.ellipse(fx+Math.cos(k*.63)*u*.9,fy-u*3.5+Math.sin(k*.63)*u*.9,u*.7,u*.25,k*.63,0,7);x.fill()}x.fillStyle='#d9a63a';x.beginPath();x.arc(fx,fy-u*3.5,u*.4,0,7);x.fill()}
+// incense: bát hương + sticks
+if(inc>0){x.fillStyle='#8a6d3b';x.beginPath();x.ellipse(gx,gy+u*.5,u*2.4,u*.8,0,0,7);x.fill();x.fillRect(gx-u*2.2,gy-u*1.2,u*4.4,u*1.7);x.fillStyle='#a8874a';x.beginPath();x.ellipse(gx,gy-u*1.2,u*2.2,u*.6,0,0,7);x.fill();
+for(let i=0;i<inc;i++){const sx=gx+(i-(inc-1)/2)*u*.8,top=gy-u*8;x.strokeStyle='#b0302a';x.lineWidth=u*.25;x.beginPath();x.moveTo(sx,gy-u*1.2);x.lineTo(sx,top);x.stroke();x.fillStyle=`rgba(255,${120+Math.sin(tm*6+i)*40},40,1)`;x.beginPath();x.arc(sx,top,u*.3,0,7);x.fill();if(Math.random()<.25)sm.push({x:sx,y:top,r:u*.3,a:.35,p:Math.random()*6})}}
+sm=sm.filter(p=>p.a>0);sm.forEach(p=>{p.y-=u*.12;p.x+=Math.sin(p.y*.03+p.p)*u*.08;p.r+=u*.02;p.a-=.0025;x.fillStyle=`rgba(230,225,215,${p.a})`;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});
+requestAnimationFrame(frame)}
+for(let i=0;i<14;i++)fire.push({x:Math.random()*W,y:H*.4+Math.random()*H*.5,p:Math.random()*6});requestAnimationFrame(frame);
+// sweep by drag
+cv.onpointermove=e=>{if(!sweeping||!(e.buttons||e.pointerType==='touch'))return;const r=cv.getBoundingClientRect(),d=devicePixelRatio||1,px=(e.clientX-r.left)*W/r.width,py=(e.clientY-r.top)*H/r.height;leaves=leaves.filter(l=>{const[a,b]=im(l.x,l.y);return Math.hypot(a-px,(b-py)*1.5)>W*.07});if(ac)brush();if(!leaves.length){sweeping=false;hint('Phần mộ đã sạch sẽ, tươm tất.')}};
+// audio: slow, quiet minor pad
+let ac,M;function audio(){if(ac)return;ac=new (window.AudioContext||webkitAudioContext)();M=ac.createGain();M.gain.value=.5;M.connect(ac.destination);
+const ch=[[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7],[164.8,207.7,246.9]];let i=0;const play=()=>{ch[i++%4].forEach(f=>pad(f,9));};play();setInterval(play,8000);
+// wind
+const len=ac.sampleRate*2,bf=ac.createBuffer(1,len,ac.sampleRate),d=bf.getChannelData(0);let l=0;for(let k=0;k<len;k++){l=(l+.02*(Math.random()*2-1))/1.02;d[k]=l*2}const n=ac.createBufferSource();n.buffer=bf;n.loop=true;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=400;const g=ac.createGain();g.gain.value=.12;n.connect(f).connect(g).connect(M);n.start()}
+function pad(fr,dur){const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='sine';o.frequency.value=fr;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+3);g.gain.linearRampToValueAtTime(0,t+dur);o.connect(g).connect(M);o.start(t);o.stop(t+dur)}
+function brush(){const t=ac.currentTime,n=ac.createBufferSource(),bf=ac.createBuffer(1,3000,ac.sampleRate),d=bf.getChannelData(0);for(let i=0;i<3000;i++)d[i]=(Math.random()*2-1)*.05*(1-i/3000);n.buffer=bf;n.connect(M);n.start(t)}
+function knell(){const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.frequency.value=98;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+6);o.connect(g).connect(M);o.start();o.stop(t+6)}
+// wall
+const SEED=[['Các anh đã nằm xuống cho đất nước đứng lên. Con cháu đời sau xin mãi khắc ghi.','Một người con Hà Tĩnh'],['Kính dâng nén hương thơm, nguyện các anh linh an nghỉ.','Lan, Thái Bình'],['Thế hệ chúng con hôm nay được bình yên là nhờ máu xương của các bác.','Đức, 17 tuổi']];
+let wall=JSON.parse(localStorage.getItem('ls_wall')||'[]');
+function showWall(){$('wall').innerHTML='';[...wall,...SEED].forEach(m=>{const d=document.createElement('div');d.className='msg';d.textContent='“'+m[0]+'”';const b=document.createElement('b');b.textContent='— '+(m[1]||'Một người viếng');d.appendChild(b);$('wall').appendChild(d)});$('mW').style.display='flex'}
+function cnt(){$('cnt').textContent=(1200+Math.floor(Math.random()*40))+' người đã thắp hương hôm nay'}cnt();setInterval(cnt,15000);
+$('go').onclick=()=>{audio();$('start').remove();hint('Xin mời thắp nén hương tưởng nhớ')};
+$('bH').onclick=()=>{audio();if(inc<3){inc=3;knell();hint('Nén hương thơm kính dâng anh linh các anh hùng liệt sĩ')}else hint('Hương đang cháy, xin lặng giây phút tưởng niệm')};
+$('bF').onclick=()=>{audio();if(flo<8){flo+=2;hint('Bó cúc trắng dâng lên phần mộ')}};
+$('bQ').onclick=()=>{sweeping=true;hint(leaves.length?'Vuốt nhẹ quanh phần mộ để quét lá':'Phần mộ đã sạch sẽ')};
+$('bV').onclick=()=>$('mV').style.display='flex';$('cx').onclick=()=>$('mV').style.display='none';
+$('sv').onclick=()=>{const t=$('tv').value.trim();if(!t)return;wall.unshift([t,$('tn').value.trim()]);localStorage.setItem('ls_wall',JSON.stringify(wall.slice(0,50)));$('tv').value='';$('mV').style.display='none';showWall()};
+$('bW').onclick=showWall;$('cw').onclick=()=>$('mW').style.display='none';
+</script></body></html>
