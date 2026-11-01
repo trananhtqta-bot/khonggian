@@ -7,9 +7,9 @@
 | Phông chữ | system-ui, sans-serif, Georgia/serif | Phông có sẵn của thiết bị; không nhúng file phông |
 | Mô hình 3D | Cảnh, nhân vật, tượng Phật, đò, cây | Dựng bằng hình khối cơ bản trong code (tự làm) |
 | Biểu tượng | `*/icon-192.png`, `*/icon-512.png`, emoji | Icon do dự án tự tạo; emoji là ký tự Unicode hiển thị bằng phông hệ thống |
-| Ảnh/video bản cũ | `*/v1/bg.jpg`, `*/preview.mp4`, `*/v1/screenshot.png`, `*/_vid/*.webm`, `shot_*.png` | Ảnh chụp/ghi màn hình từ chính game; nguồn gốc `v1/bg.jpg` cần xác nhận (nếu là ảnh AI hoặc ảnh tải về thì ghi rõ hoặc thay) |
 | Văn bản kinh | Bát Nhã Tâm Kinh (bản Hán Việt, lược) | Kinh điển phổ thông, phạm vi công cộng |
-| Bài đồng dao, thơ | Nu na nu nống… và các bài trong game | Văn học dân gian / cần ghi tác giả nếu có bài thơ hiện đại |
+| Đồng dao | Nu na nu nống… | Văn học dân gian |
+| Lời tưởng niệm (Tri Ân) | "Hàng bia trắng lặng im…" | Lời: Dưới Gốc Thị (sáng tác riêng của dự án) |
 
 Ghi chú: hình/video do AI tạo (ví dụ Veo) khi đăng lên nền tảng phải bật nhãn "nội dung do AI tạo".
 Game không có tiền ảo, không quyên góp, không nút cúng dường. Đây là trải nghiệm mô phỏng văn hóa, không thay thế nghi lễ thật.

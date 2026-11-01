@@ -1,0 +1,9 @@
+*.png
+!**/icon-*.png
+*.jpg
+*.mp4
+*.webm
+*.webp
+*.py
+_vid/
+v1/
