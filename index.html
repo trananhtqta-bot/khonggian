@@ -1,1 +1,45 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="maugiao/icon-192.png"><link rel="apple-touch-icon" href="maugiao/icon-192.png"><title>Dưới Gốc Thị · Bầu trời dưới gốc cây thị</title><style>body{font-family:sans-serif;background:#1b2a24;color:#f3ead7;text-align:center;padding:40px 16px}a{display:block;margin:18px auto;max-width:360px;padding:18px;border-radius:14px;background:#c79a3b;color:#1b1206;font-size:20px;text-decoration:none;font-weight:bold}</style></head><body><h1>Dưới Gốc Thị</h1><p style="margin-top:-8px;font-style:italic">Bầu trời dưới gốc cây thị</p><a href="dovehuongson/">Đò về Hương Sơn</a><a href="maugiao/">Lớp Mẫu Giáo Ngày Xưa</a><a href="trianlietsi/">Tri Ân Liệt Sĩ</a></body></html>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="maugiao/icon-192.png"><link rel="apple-touch-icon" href="maugiao/icon-192.png"><title>Dưới Gốc Thị · Bầu trời dưới gốc cây thị</title>
+<style>body{font-family:sans-serif;background:#1b2a24;color:#f3ead7;text-align:center;margin:0;padding:24px 16px 40px}h1{margin:6px 0 0;font-size:30px}
+a.p{display:flex;align-items:center;justify-content:space-between;margin:14px auto;max-width:380px;min-height:56px;padding:14px 18px;border-radius:14px;background:#c79a3b;color:#1b1206;font-size:21px;text-decoration:none;font-weight:bold;box-sizing:border-box}a.p small{font-weight:normal;font-size:16px;background:#fff4;border-radius:10px;padding:4px 10px}
+#tree{max-width:380px;margin:12px auto 0;border-radius:20px;overflow:hidden;background:#24382f}#tree svg{display:block;width:100%;height:auto}
+#cap{font-size:20px;line-height:1.5;margin:12px auto 4px;max-width:380px}#cap b{color:#f2c46a}.sub{font-size:16px;opacity:.75;max-width:380px;margin:0 auto}
+@keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}#crown{transform-origin:200px 300px;animation:sway 6s ease-in-out infinite}@media (prefers-reduced-motion:reduce){#crown{animation:none}}</style></head>
+<body><h1>Dưới Gốc Thị</h1><p style="margin:2px 0 0;font-style:italic">Bầu trời dưới gốc cây thị</p>
+<div id="tree" aria-label="Cây thị của bạn"></div><p id="cap"></p><p class="sub" id="sub"></p>
+<a class="p" href="dovehuongson/">Đò về Hương Sơn <small id="c-huong"></small></a><a class="p" href="maugiao/">Lớp Mẫu Giáo Ngày Xưa <small id="c-mg"></small></a><a class="p" href="trianlietsi/">Tri Ân Liệt Sĩ <small id="c-trian"></small></a>
+<script type="module">
+import { load, streakNow, doneToday } from './shared/daily.js?v=7';
+const s = load(), total = s.total, st = streakNow(s), todayDone = ['huong','mg','trian'].some(p => doneToday(p, s).length);
+const N = { huong: 3, mg: 2, trian: 3 }; for (const p in N) document.getElementById('c-' + p).textContent = `Hôm nay ${doneToday(p, s).length}/${N[p]}`;
+// giai đoạn: 0 hạt, 1-2 mầm, 3-6 cây non, 7-13 cây lá, 14-29 ra hoa, 30+ có quả
+const stage = total === 0 ? 0 : total < 3 ? 1 : total < 7 ? 2 : total < 14 ? 3 : total < 30 ? 4 : 5;
+const g = Math.min(1, 0.35 + total / 30); // độ lớn
+let r = 12345; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+let crown = '', trunk = '';
+const sky = `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d9a0"/><stop offset=".55" stop-color="#cfe3c7"/><stop offset="1" stop-color="#a9cf98"/></linearGradient>
+<radialGradient id="lf" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#7fbf5a"/><stop offset=".7" stop-color="#3f8a3a"/><stop offset="1" stop-color="#2c6a2c"/></radialGradient>
+<radialGradient id="fr" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#ffe98a"/><stop offset=".6" stop-color="#f2b625"/><stop offset="1" stop-color="#c98a12"/></radialGradient>
+<linearGradient id="tk" x1="0" x2="1"><stop offset="0" stop-color="#5a3a22"/><stop offset=".5" stop-color="#7a5232"/><stop offset="1" stop-color="#4a2e1a"/></linearGradient></defs>
+<rect width="400" height="400" fill="url(#sk)"/><circle cx="320" cy="80" r="34" fill="#fff6d8" opacity=".9"/>
+<path d="M0 330 Q100 300 200 318 T400 322 V400 H0Z" fill="#6f9e4e"/><path d="M0 352 Q120 330 220 346 T400 344 V400 H0Z" fill="#5c8a40"/>
+<ellipse cx="200" cy="338" rx="${60 + 50 * g}" ry="10" fill="#0003"/>`;
+if (stage === 0) crown = `<ellipse cx="200" cy="334" rx="26" ry="9" fill="#7a5232"/><ellipse cx="200" cy="330" rx="7" ry="5" fill="#a77a3b"/>`;
+else if (stage === 1) crown = `<path d="M200 336 Q198 315 202 298" stroke="#4f8f36" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M202 300 Q178 286 172 300 Q186 312 202 302Z" fill="url(#lf)"/><path d="M202 298 Q224 280 232 294 Q218 308 202 300Z" fill="url(#lf)"/>`;
+else {
+  const H = stage === 2 ? 90 : 120 + 70 * g, W = stage === 2 ? 8 : 14 + 16 * g, top = 336 - H;
+  trunk = `<path d="M${200 - W} 338 C${200 - W * .6} ${300} ${200 - W * .3} ${top + 40} 200 ${top + 10} C${200 + W * .3} ${top + 40} ${200 + W * .6} 300 ${200 + W} 338Z" fill="url(#tk)"/>`
+    + (stage >= 3 ? `<path d="M200 ${top + 60} Q170 ${top + 40} 150 ${top + 30}" stroke="#5a3a22" stroke-width="${5 + 5 * g}" fill="none" stroke-linecap="round"/><path d="M200 ${top + 75} Q235 ${top + 50} 258 ${top + 42}" stroke="#5a3a22" stroke-width="${5 + 5 * g}" fill="none" stroke-linecap="round"/>` : '');
+  const nLeaf = stage === 2 ? 5 : 9 + Math.round(10 * g), R = stage === 2 ? 34 : 60 + 60 * g, cy = top + 20;
+  const pts = []; for (let i = 0; i < nLeaf; i++) { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * R; pts.push([200 + Math.cos(a) * d * 1.15, cy + Math.sin(a) * d * .7]); }
+  pts.sort((a, b) => a[1] - b[1]);
+  crown = pts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(stage === 2 ? 16 : 26 + 16 * g).toFixed(1)}" fill="url(#lf)"/>`).join('');
+  if (stage >= 4) { for (let i = 0; i < 10 + 8 * g; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * R; const x = 200 + Math.cos(a) * d * 1.1, y = cy + Math.sin(a) * d * .65; crown += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">${[0, 72, 144, 216, 288].map(k => `<ellipse rx="3.2" ry="5.5" cy="-4" transform="rotate(${k})" fill="#fffbe9"/>`).join('')}<circle r="2.4" fill="#e8c55a"/></g>`; } }
+  if (stage === 5) { const nf = Math.min(14, 3 + Math.floor((total - 30) / 5)); for (let i = 0; i < nf; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * R * .9; const x = 200 + Math.cos(a) * d * 1.1, y = cy + Math.sin(a) * d * .6 + 10; crown += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11" fill="url(#fr)"/><path d="M${x - 4} ${y - 10} l4 3 l4 -3" stroke="#3d6b2a" stroke-width="2.5" fill="none"/>`; } }
+}
+document.getElementById('tree').innerHTML = `<svg viewBox="0 0 400 400" role="img">${sky}${trunk}<g id="crown">${crown}</g></svg>`;
+const names = ['Hạt thị đang chờ được gieo', 'Mầm thị vừa nhú', 'Cây thị non', 'Cây thị xanh lá', 'Cây thị đang ra hoa', 'Cây thị đã có quả thơm'];
+const next = [1, 3, 7, 14, 30][stage]; 
+document.getElementById('cap').innerHTML = total === 0 ? 'Làm một việc nhỏ ở bất kỳ nơi nào bên dưới<br>để gieo hạt thị của bạn 🌱'
+  : `${names[stage]}<br>Bạn đã chăm cây <b>${total}</b> ngày${st > 1 ? ` · <b>${st}</b> ngày liền` : ''}`;
+document.getElementById('sub').textContent = total === 0 ? '' : (todayDone ? 'Hôm nay cây đã được chăm. Mai ghé lại nhé.' : 'Hôm nay cây chưa được chăm. Làm một việc nhỏ là đủ.') + (next ? ` Còn ${next - total} ngày nữa cây sẽ lớn thêm.` : '');
+</script></body></html>

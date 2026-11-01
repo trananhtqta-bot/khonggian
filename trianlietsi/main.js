@@ -1,4 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=6';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=7';
+import { dailyTasks } from '../shared/daily.js?v=7';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
 const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
@@ -109,3 +110,10 @@ W.renderer.toneMappingExposure = _ex; W.hemi.intensity = _hi; W.scene.remove(_pl
 if (!amb) W.onFirstInput();
 W.restorePos(); ui.tutorial('move', MOVE_TUT);
 window.__W = W;
+
+const clickAct = t => [...document.querySelectorAll('#kg-acts button')].find(b => b.textContent.includes(t))?.click();
+const toGraves = m => ui.fade(() => { W.teleport(4.6, -24, Math.PI / 2); ui.toast(m, 5000); });
+dailyTasks({ ui, ST, page: 'trian', icons, solemn: true, tasks: [
+  { id: 'huong', icon: '🕯️', text: 'Thắp một nén hương', hint: 'Tại khu mộ hoặc đài tưởng niệm', keys: ['huong'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Thắp hương”') },
+  { id: 'hoa', icon: '💐', text: 'Đặt một bó hoa', hint: 'Trước một phần mộ', keys: ['hoa'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Đặt hoa”') },
+  { id: 'macniem', icon: '🙇', text: 'Mặc niệm', hint: 'Đứng lặng, cúi đầu tưởng nhớ', keys: ['macniem'], go: () => clickAct('Mặc niệm') }] });

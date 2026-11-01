@@ -1,4 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=6';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=7';
+import { dailyTasks } from '../shared/daily.js?v=7';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
@@ -144,7 +145,7 @@ W.addInteract({ pos: SAND, r: 2.6, label: '🏖️ Xây lâu đài cát', use: (
 W.addInteract({ pos: { x: LUNCH.x + 2, z: LUNCH.z }, r: 2.4, label: '🍚 Ăn cơm', use: () => { W.sit(new THREE.Vector3(LUNCH.x + 0.2, 0, LUNCH.z + 0.8), Math.PI); ui.toast(phase === 2 ? 'Cơm canh rau ngót, thịt kho trứng… ngon quá! 🍲' : 'Chưa tới giờ ăn đâu nha, lén ăn bánh quy thôi 🍪'); if (phase === 2) setTimeout(() => giveFlower('ăn hết suất cơm'), 4000); } });
 // watering chore
 let can = null; const waterI = W.addInteract({ pos: { x: BED.x + 3.2, z: BED.z }, r: 2.2, label: '🚿 Tưới cây', use: () => { if (can) return; can = new THREE.Group(); const b = mesh(new THREE.CylinderGeometry(0.15, 0.17, 0.3, 10), '#3fa34d'); can.add(b); const sp = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 6), '#3fa34d'); sp.rotation.z = 1; sp.position.set(0.2, 0.08, 0); can.add(sp); W.player.av.hand.add(can); W.player.av.holdUp = true;
-  let k = 0; const grow = setInterval(() => { flowers.forEach(f => f.scale.setScalar(Math.min(1.2, f.scale.x + 0.08))); S.noise(0.3, 0.05, 2000); if (++k > 10) { clearInterval(grow); W.player.av.hand.remove(can); can = null; W.player.av.holdUp = false; giveFlower('tưới cây chăm chỉ'); setTimeout(() => flowers.forEach(f => f.scale.setScalar(0.4)), 40000); } }, 400); } });
+  let k = 0; const grow = setInterval(() => { flowers.forEach(f => f.scale.setScalar(Math.min(1.2, f.scale.x + 0.08))); S.noise(0.3, 0.05, 2000); if (++k > 10) { clearInterval(grow); W.player.av.hand.remove(can); can = null; W.player.av.holdUp = false; giveFlower('tưới cây chăm chỉ'); ST.add('tuoi'); setTimeout(() => flowers.forEach(f => f.scale.setScalar(0.4)), 40000); } }, 400); } });
 // sweeping chore (paper scraps inside classroom)
 const scraps = leafPatch(W, { center: [0, -15], radius: 3, count: 40, y: 0.17, colors: ['#ffffff', '#ffe08a', '#ffb3c6', '#cfe8ff'], onDone: () => { stopSweep(); giveFlower('quét lớp sạch sẽ'); setTimeout(() => scraps.reset(), 40000); } });
 const rack = broom(); rack.position.set(-7.4, 1.2, -13); rack.rotation.z = 0.2; W.scene.add(rack); let held = null;
@@ -177,3 +178,8 @@ await avatarCreator(W, ui, { key: 'kg_av_mg', title: 'Chuẩn bị đi học nà
 if (!amb) W.onFirstInput(); drawChart(); setPhase(0);
 W.restorePos(); ui.tutorial('move', MOVE_TUT);
 window.__W = W;
+
+const clickAct = t => [...document.querySelectorAll('#kg-acts button')].find(b => b.textContent.includes(t))?.click();
+dailyTasks({ ui, ST, page: 'mg', icons, chime: () => S.pluck(784), tasks: [
+  { id: 'dongdao', icon: '🎵', text: 'Hát một bài đồng dao', hint: 'Vỗ tay theo nhịp', keys: ['dongdao'], go: () => clickAct('Đồng dao') },
+  { id: 'tuoi', icon: '🚿', text: 'Tưới cây', hint: 'Ở vườn hoa cạnh gốc phượng', keys: ['tuoi'], go: () => ui.fade(() => { W.teleport(BED.x + 3.2, BED.z + 1.6, Math.PI); ui.toast('Bấm nút “Tưới cây” ở dưới màn hình', 4500); }) }] });
