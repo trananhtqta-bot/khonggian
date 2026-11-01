@@ -1,5 +1,6 @@
 *.png
 !**/icon-*.png
+!shared/ungho-qr.png
 *.jpg
 *.mp4
 *.webm
