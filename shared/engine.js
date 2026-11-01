@@ -1,5 +1,6 @@
+import { getProfile, update as updProfile } from './profile.js?v=14';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=13';
+import * as THREE from './three.module.min.js?v=14';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -331,7 +332,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=13', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=14', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -364,7 +365,8 @@ export function followPet(pet, target, yaw, dt, W) {
 export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Không' }, hairs = HAIRS, pets, defaults = {}, namePH = 'Tên hiển thị', extraNote = '', goLabel = 'Vào thôi' }) {
   return new Promise((resolve) => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key)); } catch { }
-    const st = saved || { name: '', skin: SKINS[0], hair: 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
+    let pc = null; try { pc = getProfile().character; } catch { }
+    const st = saved || { name: pc?.name || '', skin: pc?.appearance?.skin || SKINS[0], hair: pc?.appearance?.hair && hairs[pc.appearance.hair] ? pc.appearance.hair : 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
     const box = document.createElement('div'); box.className = 'kg-creator';
     const chips = (field, obj) => Object.entries(obj).map(([k, v]) => `<button class="kg-chip ${st[field] === k ? 'on' : ''}" data-f="${field}" data-v="${k}">${v}</button>`).join('');
     const apOf = () => { const o = outfits.find(x => x.id === st.outfit) || outfits[0]; return { skin: st.skin, hair: st.hair, hat: st.hat, ...o.ap }; };
@@ -382,7 +384,7 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
     const P = W.player, oldDist = P.camDist, oldPitch = P.camPitch; P.camDist = 5.6; P.camPitch = 0.08; W.frozen = true;
     const spin = (dt) => { if (W.frozen) P.camYaw += dt * 0.35; }; W.onUpdate(spin);
     refresh();
-    box.querySelector('#kgc-go').onclick = () => { st.name = (st.name || '').trim() || 'Bạn'; localStorage.setItem(key, JSON.stringify(st)); refresh(); box.remove(); W.frozen = false; P.camDist = oldDist; P.camPitch = oldPitch; P.camYaw = P.yaw + Math.PI; W.sound?.init(); resolve(st); };
+    box.querySelector('#kgc-go').onclick = () => { st.name = (st.name || '').trim() || 'Bạn'; localStorage.setItem(key, JSON.stringify(st)); try { updProfile(p => { if (!p.character.name || p.character.name === 'Bạn') p.character.name = st.name; p.character.appearance.skin = st.skin; p.character.appearance.hair = st.hair; }); } catch { } refresh(); box.remove(); W.frozen = false; P.camDist = oldDist; P.camPitch = oldPitch; P.camYaw = P.yaw + Math.PI; W.sound?.init(); resolve(st); };
   });
 }
 
