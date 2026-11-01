@@ -8,7 +8,7 @@ a.p{display:flex;align-items:center;justify-content:space-between;margin:14px au
 <div id="tree" aria-label="Cây thị của bạn"></div><p id="cap"></p><p class="sub" id="sub"></p>
 <a class="p" href="dovehuongson/">Đò về Hương Sơn <small id="c-huong"></small></a><a class="p" href="maugiao/">Lớp Mẫu Giáo Ngày Xưa <small id="c-mg"></small></a><a class="p" href="trianlietsi/">Tri Ân Liệt Sĩ <small id="c-trian"></small></a>
 <script type="module">
-import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=9';
+import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=10';
 const s = load(), total = s.total, st = streakNow(s), todayDone = ['huong','mg'].some(p => doneToday(p, s).length);
 const N = { huong: 3, mg: 2, trian: 3 }; for (const p in N) document.getElementById('c-' + p).textContent = `Hôm nay ${doneToday(p, s).length}/${N[p]}`;
 // giai đoạn: 0 hạt, 1-2 mầm, 3-6 cây non, 7-13 cây lá, 14-29 ra hoa, 30+ có quả

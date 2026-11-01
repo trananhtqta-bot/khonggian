@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=9';
-import { dailyTasks } from '../shared/daily.js?v=9';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=10';
+import { dailyTasks } from '../shared/daily.js?v=10';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
 const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
@@ -82,13 +82,14 @@ function doIncense() { if (near) { incense(near.x - 0.3, near.z - 0.6, 0.35); bo
 W.addInteract({ pos: { x: 0, z: 3.8 }, r: 2.4, label: '🕯️ Dâng hương Đài tưởng niệm', use: () => { incense(0, 2.6, 1.3); bow(W.player.av); S.bell(98, 0.2); ST.add('huong'); ui.toast('Kính cẩn nghiêng mình trước anh linh các anh hùng liệt sĩ'); } });
 W.addInteract({ pos: { x: WALL.x, z: WALL.z + 2 }, r: 3, label: '✍️ Viết lời tri ân', use: () => writeMsg() });
 const BAD = '\u0000bad';
-const _BW = ['dm','d m','dmm','dcm','d c m','dkm','d k m','djt','du ma','dech','vl','v l','vcl','vkl','clgt','me may','cho chet','oc cho','fuck','shit','bitch'];
-const _BA = /(địt|đụ|đéo|lồn|buồi|cặc|cứt|đĩ|ngu như)/i;
+const _BW = ['dm','d m','dmm','dcm','d c m','dkm','d k m','djt','du ma','dech','vl','v l','vcl','vkl','clgt','me may','cho chet','oc cho','fuck','shit','bitch','cc','cl','vai lon','cai lon','con cac','an cut','thang ngu','do ngu','l0n','bu0i','dit'];
+const _BA = /(^|[^\p{L}])(địt|đụ|đéo|lồn|buồi|cặc|cứt|đĩ|ngu như)(?![\p{L}])/iu;
+const _BR = /(^|[^\p{L}\p{M}])buoi(?![\p{L}\p{M}])/iu; // plain no-diacritic 'buoi' only; 'buổi' passes
 function cleanMsg(raw) { const t = String(raw).replace(/[<>`]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60); if (!t) return '';
   if (/https?:|www\.|\.(com|vn|net|org|me|ly|io)\b|@\w|(\d[\s.\-]?){8,}/i.test(t)) return BAD;
   const n = ' ' + t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, ' ') + ' ';
   const sq = n.replace(/ /g, '');
-  if (_BA.test(t) || _BW.some(w => n.includes(' ' + w + ' ')) || /(dkm|dcm|dmm|vcl|vkl|clgt|ditme|dume|djtme)/.test(sq)) return BAD; return t; }
+  if (_BA.test(t) || _BR.test(t.normalize('NFC')) || _BW.some(w => n.includes(' ' + w + ' ')) || /(dkm|dcm|dmm|vcl|vkl|clgt|ditme|dume|djtme|vailon|cailon|concac|l0n)/.test(sq)) return BAD; return t; }
 function writeMsg() { ui.modal(`<h2>Lời tri ân</h2><input class="kg-in" id="tm" maxlength="60" placeholder="Viết đôi lời tưởng nhớ…"><button class="kg-btn main" id="ok" style="width:100%;margin-top:10px">Khắc lên tường</button><p style="font-size:13px;opacity:.75;text-align:center">Lời nhắn chỉ hiện trên máy bạn</p><p id="tmerr" style="font-size:13px;color:#b33;text-align:center"></p>`, c => c.querySelector('#ok').onclick = () => { const t = cleanMsg(c.querySelector('#tm').value); if (!t) return; if (t === BAD) { c.querySelector('#tmerr').textContent = 'Xin dùng lời lẽ trang nghiêm, không kèm link hay số điện thoại.'; return; } const a = OWN(); a.unshift({ t, n: W.player.name }); localStorage.setItem('trian_msgs', JSON.stringify(a.slice(0, 6))); drawWall(); ui.close(); ui.toast('Lời tri ân đã được khắc lên tường'); ST.add('loi'); }); }
 // sweep leaves around graves
 const leaves = leafPatch(W, { center: [12, -14], radius: 6, count: 50, colors: ['#8a6a3a', '#a07a3a', '#6a5a30'], onDone: () => { stopSweep(); ui.toast('Phần mộ đã sạch sẽ, ấm áp hơn'); ST.add('quet'); setTimeout(() => leaves.reset(), 40000); } });
