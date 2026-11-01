@@ -3,15 +3,26 @@
 a.p{display:flex;align-items:center;justify-content:space-between;margin:14px auto;max-width:380px;min-height:56px;padding:14px 18px;border-radius:14px;background:#c79a3b;color:#1b1206;font-size:21px;text-decoration:none;font-weight:bold;box-sizing:border-box}a.p small{font-weight:normal;font-size:18px;background:#fff4;border-radius:10px;padding:4px 10px}
 #tree{max-width:380px;margin:12px auto 0;border-radius:20px;overflow:hidden;background:#24382f}#tree svg{display:block;width:100%;height:auto}
 #cap{font-size:20px;line-height:1.5;margin:12px auto 4px;max-width:380px}#cap b{color:#f2c46a}.sub{font-size:18px;color:#efe6d2;max-width:380px;margin:0 auto}
-@keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}#crown{transform-origin:200px 300px;animation:sway 6s ease-in-out infinite}@media (prefers-reduced-motion:reduce){#crown{animation:none}}</style></head>
+@keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}#crown{transform-origin:200px 300px;animation:sway 6s ease-in-out infinite}@media (prefers-reduced-motion:reduce){#crown{animation:none}}
+.kg-person{overflow:visible}.kg-bob{animation:kgbob 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}@keyframes kgbob{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1px) scaleY(1.012)}}
+.kg-blink{animation:kgblink 4.5s infinite;transform-box:fill-box;transform-origin:center}@keyframes kgblink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.kg-swing{animation:kgsw 3.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}@keyframes kgsw{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.kg-tail{animation:kgtl 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:0 100%}@keyframes kgtl{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+@media (prefers-reduced-motion:reduce){.kg-bob,.kg-blink,.kg-swing,.kg-tail{animation:none}}.soon-h{max-width:380px;margin:20px auto 6px;font-size:19px;color:#f3e6c8}.soon-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:0 auto}.soon{min-height:56px;padding:10px 12px;border:2px dashed #7a6a52;border-radius:14px;background:#efe6d2;color:#3b2f1f;font-size:18px;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box}.soon small{font-size:18px;color:#4a3c28}</style></head>
 <body><h1>Dưới Gốc Thị</h1><p style="margin:2px 0 0;font-style:italic;font-size:18px">Bầu trời dưới gốc cây thị</p>
 <div id="tree" aria-label="Cây thị của bạn"></div><p id="cap"></p><p class="sub" id="sub"></p>
 <div id="me"></div><div id="house"></div>
-<a class="p" href="dovehuongson/">Đò về Hương Sơn <small id="c-huong"></small></a><a class="p" href="maugiao/">Lớp Mẫu Giáo Ngày Xưa <small id="c-mg"></small></a><a class="p" href="trianlietsi/">Tri Ân Liệt Sĩ <small id="c-trian"></small></a>
+<nav id="places" aria-label="Các địa điểm trong làng"><a class="p" href="dovehuongson/">Đò về Hương Sơn <small id="c-huong"></small></a>
+<a class="p" href="maugiao/">Lớp Mẫu Giáo Ngày Xưa <small id="c-mg"></small></a>
+<a class="p" href="trianlietsi/">Tri Ân Liệt Sĩ <small id="c-trian"></small></a>
+<!-- Thêm địa điểm mới: tạo thư mục cảnh, rồi chuyển mục từ SOON thành thẻ <a class="p"> ở trên. -->
+<h2 class="soon-h">Sắp mở trong làng</h2><div id="soon" class="soon-grid"></div></nav>
+<script>(function(){var SOON=[['☕','Quán cà phê'],['🍜','Hàng ăn sáng'],['🎬','Rạp chiếu phim'],['🛒','Chợ quê']];
+document.getElementById('soon').innerHTML=SOON.map(function(x){return '<div class="soon" role="listitem" aria-disabled="true"><span aria-hidden="true">'+x[0]+'</span> '+x[1]+'<small>Sắp mở</small></div>'}).join('');document.getElementById('soon').setAttribute('role','list');})();</script>
 <div id="code"></div>
-<script type="module">import { initHub } from './shared/hub.js?v=21'; initHub(); if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js?v=21').catch(() => { });</script>
+<script type="module">import { initHub } from './shared/hub.js?v=22'; initHub(); if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js?v=22').catch(() => { });</script>
 <script type="module">
-import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=21';
+import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=22';
 const s = load(), total = s.total, st = streakNow(s), todayDone = ['huong','mg'].some(p => doneToday(p, s).length);
 const N = { huong: 2, mg: 2 }; for (const p in N) document.getElementById('c-' + p).textContent = `Hôm nay ${doneToday(p, s).length}/${N[p]}`; document.getElementById('c-trian').textContent = 'Xin mời ghé viếng';
 // giai đoạn: 0 hạt, 1-2 mầm, 3-6 cây non, 7-13 cây lá, 14-29 ra hoa, 30+ có quả
@@ -19,25 +30,37 @@ const stage = total === 0 ? 0 : total < 3 ? 1 : total < 7 ? 2 : total < 14 ? 3 :
 const g = Math.min(1, 0.35 + total / 30); // độ lớn
 let r = 12345; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
 let crown = '', trunk = '';
-const sky = `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d9a0"/><stop offset=".55" stop-color="#cfe3c7"/><stop offset="1" stop-color="#a9cf98"/></linearGradient>
-<radialGradient id="lf" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#7fbf5a"/><stop offset=".7" stop-color="#3f8a3a"/><stop offset="1" stop-color="#2c6a2c"/></radialGradient>
-<radialGradient id="fr" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#ffe98a"/><stop offset=".6" stop-color="#f2b625"/><stop offset="1" stop-color="#c98a12"/></radialGradient>
-<linearGradient id="tk" x1="0" x2="1"><stop offset="0" stop-color="#5a3a22"/><stop offset=".5" stop-color="#7a5232"/><stop offset="1" stop-color="#4a2e1a"/></linearGradient></defs>
-<rect width="400" height="400" fill="url(#sk)"/><circle cx="320" cy="80" r="34" fill="#fff6d8" opacity=".9"/>
-<path d="M0 330 Q100 300 200 318 T400 322 V400 H0Z" fill="#6f9e4e"/><path d="M0 352 Q120 330 220 346 T400 344 V400 H0Z" fill="#5c8a40"/>
+const sky = `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c98a"/><stop offset=".45" stop-color="#f6e3b8"/><stop offset=".8" stop-color="#d8e8c4"/><stop offset="1" stop-color="#b9d79e"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#fff1c4" stop-opacity=".9"/><stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/></radialGradient>
+<radialGradient id="lf" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8fca62"/><stop offset=".65" stop-color="#4a9640"/><stop offset="1" stop-color="#2f6e2e"/></radialGradient>
+<radialGradient id="ld" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#3a7a34"/><stop offset="1" stop-color="#245a26"/></radialGradient>
+<radialGradient id="fr" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#fff2a8"/><stop offset=".55" stop-color="#f5bd2e"/><stop offset="1" stop-color="#c98a12"/></radialGradient>
+<linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78a852"/><stop offset="1" stop-color="#4f7f38"/></linearGradient>
+<linearGradient id="tk" x1="0" x2="1"><stop offset="0" stop-color="#4f3320"/><stop offset=".45" stop-color="#86603a"/><stop offset="1" stop-color="#3f2716"/></linearGradient></defs>
+<rect width="400" height="400" fill="url(#sk)"/><circle cx="318" cy="84" r="70" fill="url(#sun)"/><circle cx="318" cy="84" r="24" fill="#fffaf0"/>
+<g fill="#fff" opacity=".7"><ellipse cx="80" cy="70" rx="34" ry="9"/><ellipse cx="104" cy="62" rx="20" ry="9"/><ellipse cx="236" cy="44" rx="26" ry="7"/></g>
+<path d="M0 300 Q60 262 130 284 Q190 300 250 270 Q320 240 400 280 V340 H0Z" fill="#a8c890" opacity=".75"/>
+<g fill="#7a9a6a" opacity=".7"><path d="M40 300 l18 -14 l18 14Z"/><rect x="44" y="300" width="28" height="10"/><path d="M318 292 l20 -15 l20 15Z"/><rect x="322" y="292" width="32" height="12"/></g>
+<g stroke="#5f8a46" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"><path d="M14 336 Q8 270 20 214"/><path d="M26 336 Q26 280 40 230"/><path d="M386 336 Q394 274 380 220"/><path d="M374 336 Q372 284 362 240"/></g>
+<g fill="#6aa04a" opacity=".85"><ellipse cx="22" cy="220" rx="10" ry="4" transform="rotate(-30 22 220)"/><ellipse cx="42" cy="236" rx="10" ry="4" transform="rotate(-40 42 236)"/><ellipse cx="378" cy="226" rx="10" ry="4" transform="rotate(30 378 226)"/><ellipse cx="360" cy="246" rx="10" ry="4" transform="rotate(40 360 246)"/></g>
+<path d="M0 330 Q100 304 200 318 T400 322 V400 H0Z" fill="url(#gr)"/><path d="M0 356 Q120 334 220 350 T400 348 V400 H0Z" fill="#4c7a36"/>
+${Array.from({ length: 18 }, (_, i) => { const x = 12 + i * 22 + (i % 3) * 5, y = 350 + (i % 4) * 9; return `<path d="M${x} ${y} l-3 -8 M${x} ${y} l0 -10 M${x} ${y} l3 -8" stroke="#8fc066" stroke-width="1.6" stroke-linecap="round"/>`; }).join('')}
 <ellipse cx="200" cy="338" rx="${60 + 50 * g}" ry="10" fill="#0003"/>`;
 if (stage === 0) crown = `<ellipse cx="200" cy="334" rx="26" ry="9" fill="#7a5232"/><ellipse cx="200" cy="330" rx="7" ry="5" fill="#a77a3b"/>`;
 else if (stage === 1) crown = `<path d="M200 336 Q198 315 202 298" stroke="#4f8f36" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M202 300 Q178 286 172 300 Q186 312 202 302Z" fill="url(#lf)"/><path d="M202 298 Q224 280 232 294 Q218 308 202 300Z" fill="url(#lf)"/>`;
 else {
   const H = stage === 2 ? 90 : 120 + 70 * g, W = stage === 2 ? 8 : 14 + 16 * g, top = 336 - H;
-  trunk = `<path d="M${200 - W} 338 C${200 - W * .6} ${300} ${200 - W * .3} ${top + 40} 200 ${top + 10} C${200 + W * .3} ${top + 40} ${200 + W * .6} 300 ${200 + W} 338Z" fill="url(#tk)"/>`
+  trunk = `<path d="M${200 - W} 338 C${200 - W * .6} ${300} ${200 - W * .3} ${top + 40} 200 ${top + 10} C${200 + W * .3} ${top + 40} ${200 + W * .6} 300 ${200 + W} 338Z" fill="url(#tk)"/><path d="M${200 - W} 338 q-10 2 -16 6 M${200 + W} 338 q10 2 16 6" stroke="#4f3320" stroke-width="${3 + 3 * g}" stroke-linecap="round" fill="none"/><path d="M${200 - W * .3} 330 Q${200 - W * .2} ${top + 80} ${200 - 2} ${top + 40} M${200 + W * .4} 320 Q${200 + W * .3} ${top + 100} ${200 + 3} ${top + 60}" stroke="#3a2416" stroke-width="1.4" fill="none" opacity=".5"/>`
     + (stage >= 3 ? `<path d="M200 ${top + 60} Q170 ${top + 40} 150 ${top + 30}" stroke="#5a3a22" stroke-width="${5 + 5 * g}" fill="none" stroke-linecap="round"/><path d="M200 ${top + 75} Q235 ${top + 50} 258 ${top + 42}" stroke="#5a3a22" stroke-width="${5 + 5 * g}" fill="none" stroke-linecap="round"/>` : '');
   const nLeaf = stage === 2 ? 5 : 9 + Math.round(10 * g), R = stage === 2 ? 34 : 60 + 60 * g, cy = top + 20;
   const pts = []; for (let i = 0; i < nLeaf; i++) { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * R; pts.push([200 + Math.cos(a) * d * 1.15, cy + Math.sin(a) * d * .7]); }
   pts.sort((a, b) => a[1] - b[1]);
-  crown = pts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(stage === 2 ? 16 : 26 + 16 * g).toFixed(1)}" fill="url(#lf)"/>`).join('');
+  const rr = stage === 2 ? 16 : 26 + 16 * g;
+  crown = pts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${(y + rr * .25).toFixed(1)}" r="${(rr * 1.02).toFixed(1)}" fill="url(#ld)"/>`).join('')
+    + pts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="url(#lf)"/>`).join('')
+    + pts.filter((_, i) => i % 2 === 0).map(([x, y]) => `<ellipse cx="${(x - rr * .3).toFixed(1)}" cy="${(y - rr * .35).toFixed(1)}" rx="${(rr * .38).toFixed(1)}" ry="${(rr * .22).toFixed(1)}" fill="#b8e08a" opacity=".35"/>`).join('');
   if (stage >= 4) { for (let i = 0; i < 10 + 8 * g; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * R; const x = 200 + Math.cos(a) * d * 1.1, y = cy + Math.sin(a) * d * .65; crown += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">${[0, 72, 144, 216, 288].map(k => `<ellipse rx="3.2" ry="5.5" cy="-4" transform="rotate(${k})" fill="#fffbe9"/>`).join('')}<circle r="2.4" fill="#e8c55a"/></g>`; } }
-  if (stage === 5) { const nf = Math.min(14, 3 + Math.floor((total - 30) / 5)); for (let i = 0; i < nf; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * R * .9; const x = 200 + Math.cos(a) * d * 1.1, y = cy + Math.sin(a) * d * .6 + 10; crown += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11" fill="url(#fr)"/><path d="M${x - 4} ${y - 10} l4 3 l4 -3" stroke="#3d6b2a" stroke-width="2.5" fill="none"/>`; } }
+  if (stage === 5) { const nf = Math.min(14, 3 + Math.floor((total - 30) / 5)); for (let i = 0; i < nf; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * R * .9; const x = 200 + Math.cos(a) * d * 1.1, y = cy + Math.sin(a) * d * .6 + 10; crown += `<circle cx="${x.toFixed(1)}" cy="${(y + 1.5).toFixed(1)}" r="11.5" fill="#0002"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="11" fill="url(#fr)"/><ellipse cx="${(x - 3.5).toFixed(1)}" cy="${(y - 4).toFixed(1)}" rx="3" ry="2" fill="#fff" opacity=".55"/><path d="M${x - 4} ${y - 10} l4 3 l4 -3" stroke="#3d6b2a" stroke-width="2.5" fill="none"/>`; } }
 }
 document.getElementById('tree').innerHTML = `<svg viewBox="0 0 400 400" role="img">${sky}${trunk}<g id="crown">${crown}</g></svg>`;
 const names = ['Hạt thị đang chờ được gieo', 'Mầm thị vừa nhú', 'Cây thị non', 'Cây thị xanh lá', 'Cây thị đang ra hoa', 'Cây thị đã có quả thơm'];
@@ -54,7 +77,7 @@ document.getElementById('uhwrap').innerHTML=`<button id="ungho" style="margin:22
 <button id="uhx" aria-label="Đóng" style="position:absolute;top:4px;right:4px;width:48px;height:48px;border:0;background:none;font-size:26px;cursor:pointer;color:#2a2116">×</button>
 <h2 style="margin:4px 0 10px;font-size:21px">☕ Góp ly trà cho người làm game</h2>
 <p style="font-size:18px;line-height:1.5;margin:0 0 12px">Game này mình làm tặng sinh nhật cô nhóc ở nhà, đứa suốt ngày bám bố 🥰. Bác nào thấy vui thì ủng hộ mình chút nha. Chúc các bác và gia đình có những phút giây vui vẻ!</p>
-<img src="shared/ungho-qr.png?v=21" alt="Mã VietQR chuyển khoản ủng hộ" style="width:100%;max-width:270px;border-radius:10px">
+<img src="shared/ungho-qr.png?v=22" alt="Mã VietQR chuyển khoản ủng hộ" style="width:100%;max-width:270px;border-radius:10px">
 <p style="font-size:18px;opacity:.8;line-height:1.45;margin:10px 0 4px">Khoản này là ủng hộ tự nguyện cho người làm game, không phải cúng dường, công đức hay từ thiện, và không được hoàn lại. Ủng hộ hay không thì trải nghiệm trong game vẫn như nhau.</p>
 <p style="font-size:18px;opacity:.8;margin:4px 0 0">Nếu bạn dưới 18 tuổi, hãy hỏi bố mẹ trước khi ủng hộ.</p></div></div>`;
 const m=document.getElementById('uh'),o=()=>{m.style.display='block'},c=()=>{m.style.display='none'};document.getElementById('ungho').onclick=o;document.getElementById('uhx').onclick=c;m.onclick=e=>{if(e.target===m)c()};addEventListener('keydown',e=>{if(e.key==='Escape')c()})})();

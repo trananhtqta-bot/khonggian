@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=21';
+import { getProfile, update as updProfile } from './profile.js?v=22';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=21';
+import * as THREE from './three.module.min.js?v=22';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -55,6 +55,8 @@ export function makeAvatar(ap = {}) {
   const mkLimb = (geo, m, x, y) => { const p = new THREE.Group(); p.position.set(x, y, 0); const l = mesh(geo, m); l.position.y = -0.2; p.add(l); return p; };
   const AD = !!ap.adult, HIP = AD ? 0.74 : 0.5;
   const legL = mkLimb(legG, mat(ap.bottom), -0.1, HIP), legR = mkLimb(legG, mat(ap.bottom), 0.1, HIP); if (AD) { legL.scale.set(1.05, 1.5, 1.05); legR.scale.set(1.05, 1.5, 1.05); }
+  const shoeG = new THREE.SphereGeometry(0.1, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), shoeM = mat(ap.shoe || '#4a3222', { roughness: 0.7 });
+  [legL, legR].forEach(l => { const sh = mesh(shoeG, shoeM); sh.scale.set(1, 0.7, 1.45); sh.position.set(0, -0.44, 0.03); if (AD) sh.scale.y = 0.47; l.add(sh); });
   root.add(legL, legR);
   const upper = new THREE.Group(); upper.position.y = HIP; root.add(upper);
   const long = ap.style === 'aodai' || ap.style === 'trang' || ap.style === 'aotrang';
@@ -67,16 +69,21 @@ export function makeAvatar(ap = {}) {
   const armL = mkLimb(armG, mat(ap.top), -0.24, 0.47), armR = mkLimb(armG, mat(ap.top), 0.24, 0.47);
   [armL, armR].forEach(a => { const h = mesh(new THREE.SphereGeometry(0.065, 8, 6), skin); h.position.y = -0.42; a.add(h); }); upper.add(armL, armR);
   if (AD) [armL, armR].forEach(a => { a.scale.set(1, 1.3, 1); a.position.y = 0.58; });
+  const neck = mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.12, 8), skin); neck.position.y = AD ? 0.72 : 0.54; upper.add(neck);
   const HEADY = AD ? 0.86 : 0.82; const head = new THREE.Group(); head.position.y = HEADY; if (AD) head.scale.setScalar(0.62); upper.add(head);
   head.add(mesh(new THREE.SphereGeometry(0.3, 20, 16), skin));
-  const eyeM = mat('#1d140e', { roughness: 0.3 });
-  [-0.1, 0.1].forEach(x => { const e = mesh(new THREE.SphereGeometry(0.04, 8, 6), eyeM); e.position.set(x, 0.0, 0.27); e.scale.set(1, 1.25, 0.6); head.add(e);
-    if (AD) return; const hl = mesh(new THREE.SphereGeometry(0.012, 6, 4), '#ffffff', { emissive: '#ffffff' }); hl.position.set(x + 0.012, 0.018, 0.295); head.add(hl);
+  [-1, 1].forEach(s => { const ea = mesh(new THREE.SphereGeometry(0.06, 8, 6), skin); ea.scale.set(0.55, 1, 0.8); ea.position.set(0.29 * s, -0.02, 0); head.add(ea); });
+  const eyeM = mat('#1d140e', { roughness: 0.3 }), eyes = new THREE.Group(); head.add(eyes);
+  const browM = mat(ap.hairColor, { roughness: 0.6 });
+  [-0.1, 0.1].forEach(x => { const br = mesh(new THREE.CapsuleGeometry(0.012, 0.05, 2, 4), browM); br.rotation.z = Math.PI / 2 + x * 1.2; br.position.set(x, 0.075, 0.275); head.add(br); });
+  [-0.1, 0.1].forEach(x => { const e = mesh(new THREE.SphereGeometry(0.04, 8, 6), eyeM); e.position.set(x, 0.0, 0.27); e.scale.set(1, 1.25, 0.6); eyes.add(e);
+    if (AD) return; const hl = mesh(new THREE.SphereGeometry(0.012, 6, 4), '#ffffff', { emissive: '#ffffff' }); hl.position.set(x + 0.012, 0.018, 0.295); eyes.add(hl);
     const b = mesh(new THREE.CircleGeometry(0.045, 10), new THREE.MeshBasicMaterial({ color: '#f29a9a', transparent: true, opacity: 0.55 })); b.position.set(x * 1.75, -0.08, 0.255); b.rotation.y = x * 2.2; head.add(b); });
   const mouth = mesh(new THREE.TorusGeometry(0.035, 0.008, 4, 10, Math.PI), '#8a3a2a'); mouth.position.set(0, -0.1, 0.285); mouth.rotation.z = Math.PI; head.add(mouth);
   const hm = mat(ap.hairColor, { roughness: 0.55 });
   if (ap.hair !== 'troc') { const cap = mesh(new THREE.SphereGeometry(0.315, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), hm); cap.rotation.x = -0.25; head.add(cap);
-    const fr = mesh(new THREE.SphereGeometry(0.31, 16, 8, -0.9, 1.8, 0.35, 0.55), hm); fr.rotation.y = 0; head.add(fr); }
+    const fr = mesh(new THREE.SphereGeometry(0.31, 16, 8, -0.9, 1.8, 0.35, 0.55), hm); fr.rotation.y = 0; head.add(fr);
+    [-0.12, 0, 0.12].forEach((x, i) => { const tf = mesh(new THREE.SphereGeometry(0.09, 8, 6), hm); tf.scale.set(1, 0.6, 0.5); tf.position.set(x, 0.2 - (i === 1 ? 0 : 0.02), 0.22); tf.rotation.z = -x * 2; head.add(tf); }); }
   if (ap.hair === 'bui') { const b = mesh(new THREE.SphereGeometry(0.13, 12, 10), hm); b.position.set(0, 0.2, -0.24); head.add(b); }
   if (ap.hair === 'dai') { const b = mesh(new THREE.CapsuleGeometry(0.2, 0.35, 4, 10), hm); b.position.set(0, -0.2, -0.16); b.scale.z = 0.5; head.add(b); }
   if (ap.hair === 'choi') [-1, 1].forEach(s => { const b = mesh(new THREE.CapsuleGeometry(0.06, 0.2, 3, 8), hm); b.position.set(0.27 * s, -0.12, -0.08); b.rotation.z = s * 0.3; head.add(b);
@@ -89,7 +96,7 @@ export function makeAvatar(ap = {}) {
   // held prop slot (broom, beads, incense…)
   const hand = new THREE.Group(); hand.position.y = -0.42; armR.add(hand);
   root.scale.setScalar(ap.scale);
-  const av = { hip: HIP, headY: HEADY, tagY: AD ? 2.05 : 1.85, root, legL, legR, armL, armR, upper, head, hand, ap, walk: 0, seat: 0, bow: 0, bowT: 0, wave: 0 };
+  const av = { hip: HIP, headY: HEADY, tagY: AD ? 2.05 : 1.85, root, legL, legR, armL, armR, upper, head, hand, eyes, ap, blinkT: 2 + Math.random() * 3, walk: 0, seat: 0, bow: 0, bowT: 0, wave: 0 };
   root.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return av;
 }
@@ -110,6 +117,8 @@ export function animateAvatar(av, dt, speed = 0, t = performance.now() / 1000) {
   if (av.sweeping) { av.armR.rotation.x = -0.6 + Math.sin(t * 6) * 0.5; av.armR.rotation.z = -0.2; av.armL.rotation.x = -0.5 + Math.sin(t * 6) * 0.4; }
   av.head.rotation.y = Math.sin(t * 0.5 + av.root.id) * 0.12 * (speed < 0.1 ? 1 : 0);
   av.head.position.y = (av.headY || 0.82) + Math.sin(t * 2 + av.root.id) * 0.008;
+  const br = 1 + Math.sin(t * 1.8 + av.root.id) * 0.012 * (speed < 0.1 ? 1 : 0.3); av.upper.scale.set(1, br, 1);
+  if (av.eyes) { av.blinkT -= dt; if (av.blinkT < 0) av.blinkT = 2.5 + Math.random() * 3; av.eyes.scale.y = av.blinkT < 0.12 ? 0.15 : 1; av.eyes.position.y = av.blinkT < 0.12 ? 0.0 : 0; }
 }
 export function bow(av) { av.bowT = 2.2; }
 
@@ -333,7 +342,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=21', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=22', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;

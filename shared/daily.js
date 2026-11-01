@@ -1,4 +1,4 @@
-import { addProgress, touch } from './profile.js?v=21';
+import { addProgress, touch } from './profile.js?v=22';
 /* Chuỗi ngày + việc nhỏ mỗi ngày — chỉ lưu trên máy (localStorage), không số ảo */
 const K = 'kg_daily';
 export const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
