@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=15';
+import { getProfile, update as updProfile } from './profile.js?v=16';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=15';
+import * as THREE from './three.module.min.js?v=16';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -171,7 +171,7 @@ const CSS = `
 .kg-title{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:14px;padding:6px 12px;box-shadow:0 4px 18px #0003}
 .kg-title b{font-family:Georgia,serif;font-size:19px;color:var(--accent);display:block}.kg-title small{font-size:13px;opacity:.75}
 .kg-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
-.kg-btn{border:0;border-radius:12px;padding:10px 14px;min-height:48px;min-width:48px;font:600 16px system-ui;background:var(--panel);color:var(--accent);box-shadow:0 3px 12px #0003;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
+.kg-btn{border:0;border-radius:12px;padding:10px 14px;min-height:48px;min-width:48px;font:600 18px system-ui;background:var(--panel);color:var(--accent);box-shadow:0 3px 12px #0003;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
 .kg-btn:active{transform:scale(.93)}.kg-btn.main{background:var(--accent);color:var(--panelSolid)}
 .kg-acts{position:absolute;right:8px;bottom:max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;align-items:flex-end}
 .kg-acts .row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:62vw}
@@ -201,6 +201,7 @@ const CSS = `
 .kg-icons .kg-btn small{font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap}
 .kg-card{font-size:16px}.kg-card p{line-height:1.55}
 .kg-close{position:sticky;top:0;float:right;width:44px;height:44px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
+.kg-outfit{position:absolute;left:50%;transform:translateX(-50%);top:calc(120px + env(safe-area-inset-top));display:flex;gap:6px;z-index:6}.kg-outfit .kg-btn{font-size:18px;min-height:48px}
 .kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 17px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
 .kg-tut{position:absolute;inset:0;background:#000b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:auto;z-index:25;text-align:center;padding:24px;font-size:19px;line-height:1.5}
 .kg-tut .g{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}.kg-tut .g div{background:#ffffff1a;border-radius:16px;padding:16px;width:min(42vw,220px)}.kg-tut .g i{display:block;font-style:normal;font-size:40px}
@@ -332,7 +333,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=15', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=16', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -366,27 +367,40 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
   return new Promise((resolve) => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key)); } catch { }
     let pc = null; try { pc = getProfile().character; } catch { }
-    const st = saved || { name: pc?.name || '', skin: pc?.appearance?.skin || SKINS[0], hair: pc?.appearance?.hair && hairs[pc.appearance.hair] ? pc.appearance.hair : 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
-    const box = document.createElement('div'); box.className = 'kg-creator';
+    if (saved && typeof saved === 'object') { saved.name = cleanName(saved.name || '').slice(0, 16); if (!/^#[0-9a-f]{6}$/i.test(saved.skin)) delete saved.skin; for (const f of ['hair', 'outfit', 'hat', 'pet']) if (saved[f] != null && !/^[a-z0-9_-]{1,24}$/i.test(saved[f])) delete saved[f]; if (!hairs[saved.hair]) delete saved.hair; if (!outfits.some(o => o.id === saved.outfit)) delete saved.outfit; } else saved = null;
+    // nhân vật đã tạo ở trang chủ: không hiện bảng tạo nhân vật, chỉ mời đổi trang phục cho cảnh này
+    const quick = !!(pc && pc.name);
+    const base = { name: pc?.name || '', skin: pc?.appearance?.skin || SKINS[0], hair: pc?.appearance?.hair && hairs[pc.appearance.hair] ? pc.appearance.hair : 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
+    const st = saved ? { ...base, ...saved } : { ...base };
+    if (quick) { st.name = pc.name; if (!saved || !saved.custom) { st.skin = base.skin; st.hair = base.hair; } if (!saved || !saved.outfitPicked) st.top = pc.appearance.top; }
+    const apOf = () => { const o = outfits.find(x => x.id === st.outfit) || outfits[0]; return { skin: st.skin, hair: st.hair, hat: st.hat, ...o.ap, ...(st.top && /^#[0-9a-f]{6}$/i.test(st.top) ? { top: st.top } : {}) }; };
+    const refresh = () => { W.setAvatar(apOf(), st.name || 'Bạn'); W.setPet?.(st.pet); };
     const chips = (field, obj) => Object.entries(obj).map(([k, v]) => `<button class="kg-chip ${st[field] === k ? 'on' : ''}" data-f="${field}" data-v="${k}">${v}</button>`).join('');
-    const apOf = () => { const o = outfits.find(x => x.id === st.outfit) || outfits[0]; return { skin: st.skin, hair: st.hair, hat: st.hat, ...o.ap }; };
-    box.innerHTML = `<h2>${title}</h2>${extraNote}<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${(st.name || '').replace(/"/g, '')}"></div>
+    function openPanel(done) {
+      const box = document.createElement('div'); box.className = 'kg-creator';
+      box.innerHTML = `<h2>${quick ? 'Trang phục cho cảnh này' : title}</h2>${quick ? '' : extraNote}${quick ? '' : `<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${cleanName(st.name || '')}"></div>`}
       <div class="kg-row"><span>Màu da</span><div class="kg-chips">${SKINS.map(s => `<button class="kg-chip kg-sw ${st.skin === s ? 'on' : ''}" style="background:${s}" data-f="skin" data-v="${s}"></button>`).join('')}</div></div>
       <div class="kg-row"><span>Kiểu tóc</span><div class="kg-chips">${chips('hair', hairs)}</div></div>
       <div class="kg-row"><span>Trang phục</span><div class="kg-chips">${chips('outfit', Object.fromEntries(outfits.map(o => [o.id, o.label])))}</div></div>
       ${Object.keys(hats).length > 1 ? `<div class="kg-row"><span>Phụ kiện</span><div class="kg-chips">${chips('hat', hats)}</div></div>` : ''}
       ${pets ? `<div class="kg-row"><span>Bạn đồng hành</span><div class="kg-chips">${chips('pet', pets)}</div></div>` : ''}
-      <button class="kg-btn main" id="kgc-go" style="width:100%;margin-top:10px;font-size:17px;padding:13px">${goLabel}</button>`;
-    ui.root.appendChild(box);
-    const refresh = () => { W.setAvatar(apOf(), st.name || 'Bạn'); W.setPet?.(st.pet); };
-    box.addEventListener('click', e => { const b = e.target.closest('.kg-chip'); if (!b) return; st[b.dataset.f] = b.dataset.v; box.querySelectorAll(`[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle('on', x === b)); W.sound?.init(); W.sound?.tone(880, 0.2, 0.05); refresh(); });
-    box.querySelector('#kgc-name').oninput = (e) => { st.name = e.target.value; };
-    const P = W.player, oldDist = P.camDist, oldPitch = P.camPitch; P.camDist = 5.6; P.camPitch = 0.08; W.frozen = true;
-    const spin = (dt) => { if (W.frozen) P.camYaw += dt * 0.35; }; W.onUpdate(spin);
-    refresh();
-    box.querySelector('#kgc-go').onclick = () => { st.name = (st.name || '').trim() || 'Bạn'; localStorage.setItem(key, JSON.stringify(st)); try { updProfile(p => { if (!p.character.name || p.character.name === 'Bạn') p.character.name = st.name; p.character.appearance.skin = st.skin; p.character.appearance.hair = st.hair; }); } catch { } refresh(); box.remove(); W.frozen = false; P.camDist = oldDist; P.camPitch = oldPitch; P.camYaw = P.yaw + Math.PI; W.sound?.init(); resolve(st); };
+      <button class="kg-btn main" id="kgc-go" style="width:100%;margin-top:10px;font-size:18px;min-height:52px">${quick ? 'Xong' : goLabel}</button>`;
+      ui.root.appendChild(box);
+      box.addEventListener('click', e => { const b = e.target.closest('.kg-chip'); if (!b) return; st[b.dataset.f] = b.dataset.v; if (b.dataset.f === 'outfit') { delete st.top; st.outfitPicked = true; } st.custom = true; box.querySelectorAll(`[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle('on', x === b)); W.sound?.init(); W.sound?.tone(880, 0.2, 0.05); refresh(); });
+      const ni = box.querySelector('#kgc-name'); if (ni) ni.oninput = (e) => { st.name = e.target.value; };
+      const P = W.player, oldDist = P.camDist, oldPitch = P.camPitch; P.camDist = 5.6; P.camPitch = 0.08; W.frozen = true;
+      const spin = (dt) => { if (W.frozen) P.camYaw += dt * 0.35; }; W.onUpdate(spin);
+      refresh();
+      box.querySelector('#kgc-go').onclick = () => { st.name = cleanName(st.name || '').slice(0, 16) || 'Bạn'; localStorage.setItem(key, JSON.stringify(st)); if (!quick) try { updProfile(p => { if (!p.character.name || p.character.name === 'Bạn') p.character.name = st.name; p.character.appearance.skin = st.skin; if (HAIRS_P.includes(st.hair)) p.character.appearance.hair = st.hair; }); } catch { } refresh(); box.remove(); W.frozen = false; P.camDist = oldDist; P.camPitch = oldPitch; P.camYaw = P.yaw + Math.PI; W.sound?.init(); done(); };
+    }
+    if (!quick) { openPanel(() => resolve(st)); return; }
+    refresh(); resolve(st);
+    const chip = document.createElement('div'); chip.className = 'kg-outfit pe'; chip.innerHTML = '<button class="kg-btn">👕 Đổi trang phục cho cảnh này?</button><button class="kg-btn" aria-label="Không, cảm ơn">×</button>';
+    const [yes, no] = chip.querySelectorAll('button'); yes.onclick = (e) => { e.stopPropagation(); chip.remove(); openPanel(() => { }); }; no.onclick = (e) => { e.stopPropagation(); chip.remove(); };
+    ui.root.appendChild(chip); setTimeout(() => chip.remove(), 15000);
   });
 }
+const HAIRS_P = ['ngan', 'dai', 'buoi', 'troc'];
 
 /* ---------------- shared helpers: map, share, leaves (chore), beads, reader ---------------- */
 export function mapView(W, ui, areas, title = 'Bản đồ') {
@@ -399,11 +413,11 @@ export function shareInvite(ui, { name, text, place }) { if (LIVE) return;
   text = `${text} · Dưới Gốc Thị – Bầu trời dưới gốc cây thị`; const msg = `${text} ${url}`;
   if (navigator.share) navigator.share({ title: document.title, text, url }).catch(() => { });
   else navigator.clipboard?.writeText(msg).then(() => { const n = ui.$('kg-card').querySelector('#kg-copied'); if (n) n.textContent = '✓ Đã chép link'; }).catch(() => { });
-  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:13px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
-  <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`);
+  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:13px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p id="kg-invt" style="font-size:14px;line-height:1.5"></p><input id="kg-invu" class="kg-in" readonly onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
+  <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`, card => { card.querySelector('#kg-invt').textContent = text; card.querySelector('#kg-invu').value = url; });
 }
 /* bỏ link, số điện thoại, ký tự lạ; tối đa 20 ký tự */
-export function cleanName(t = '') { return String(t).replace(/https?:\/\/\S+|www\.\S+|\S+\.(com|vn|net|org|me|ly|io)\S*/gi, '').replace(/[+\d][\d .\-]{6,}\d/g, '').replace(/[<>"'`&\\{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+export function cleanName(t = '') { return String(t).replace(/https?:\/\/\S+|www\.\S+|\S+\.(com|vn|net|org|me|ly|io)\S*/gi, '').replace(/[+\d][\d .\-]{6,}\d/g, '').replace(/[<>"'`&\\{}=]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 export function refGreeting(ui, fmt) { if (LIVE) return; const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => { const c = cleanName(r); if (c) ui.toast(fmt(c), 5000); }, 1500); }
 export function leafPatch(W, { center, radius, count = 50, colors = ['#b5803a', '#8f6a2c', '#c99a4a', '#7b5a28'], onDone, sound }) {
   const g = new THREE.PlaneGeometry(0.22, 0.12); const leaves = [];

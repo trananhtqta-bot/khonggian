@@ -1,12 +1,12 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=15';
-import { dailyTasks, doneToday } from '../shared/daily.js?v=15';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=16';
+import { dailyTasks, doneToday } from '../shared/daily.js?v=16';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
 const walkable = (x, z) => x > -21 && x < 21 && z > -25 && z < 19;
 const W = createWorld({ fog: ['#f6e6c8', 30, 110], sky: ['#8fc6e8', '#fdf0d4', '#fff1c0'], hemi: ['#fff6e0', '#7a8f4a', 1.3], sun: ['#fff0cc', 2.3], sunDir: [18, 30, 22], spawn: [-1.6, 0, 10.5], spawnYaw: Math.PI, saveKey: 'mg', heightAt: (x, z) => inside(x, z) ? 0.15 : 0, walkable, meColor: '#ffd36b' });
 const S = W.sound = new Sound();
-const ui = W.ui = makeUI({ title: 'Lớp Mẫu Giáo Ngày Xưa', sub: '<span id="phase">Giờ học</span>', accent: '#c0392b', panel: '#fff8e8d9', panelSolid: '#fff8e8', glow: '#ffc85a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
+const ui = W.ui = makeUI({ title: 'Lớp Mẫu Giáo Ngày Xưa', sub: '<span id="phase">Giờ học</span>', accent: '#c0392b', panel: '#fff8e8d9', panelSolid: '#fff8e8', glow: '#ffc85a66' });
 const ST = stats(ui, 'mg');
 
 // ---------- ground ----------
