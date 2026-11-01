@@ -50,23 +50,25 @@ export function makeAvatar(ap = {}) {
   const root = new THREE.Group(), skin = mat(ap.skin, { roughness: 0.65 });
   const legG = new THREE.CapsuleGeometry(0.085, 0.32, 3, 8), armG = new THREE.CapsuleGeometry(0.065, 0.3, 3, 8);
   const mkLimb = (geo, m, x, y) => { const p = new THREE.Group(); p.position.set(x, y, 0); const l = mesh(geo, m); l.position.y = -0.2; p.add(l); return p; };
-  const legL = mkLimb(legG, mat(ap.bottom), -0.1, 0.5), legR = mkLimb(legG, mat(ap.bottom), 0.1, 0.5);
+  const AD = !!ap.adult, HIP = AD ? 0.74 : 0.5;
+  const legL = mkLimb(legG, mat(ap.bottom), -0.1, HIP), legR = mkLimb(legG, mat(ap.bottom), 0.1, HIP); if (AD) { legL.scale.set(1.05, 1.5, 1.05); legR.scale.set(1.05, 1.5, 1.05); }
   root.add(legL, legR);
-  const upper = new THREE.Group(); upper.position.y = 0.5; root.add(upper);
+  const upper = new THREE.Group(); upper.position.y = HIP; root.add(upper);
   const long = ap.style === 'aodai' || ap.style === 'trang' || ap.style === 'aotrang';
   const torso = mesh(new THREE.CylinderGeometry(0.17, long ? 0.3 : 0.22, long ? 0.75 : 0.5, 12), ap.top, { roughness: 0.9 });
-  torso.position.y = long ? 0.13 : 0.25; upper.add(torso);
+  torso.position.y = long ? 0.13 : 0.25; if (AD) { torso.scale.set(1.08, 1.25, 0.9); torso.position.y = long ? 0.17 : 0.31; } upper.add(torso);
   if (ap.style === 'yem') { const y = mesh(new THREE.BoxGeometry(0.3, 0.3, 0.05), ap.bottom); y.position.set(0, 0.25, 0.18); upper.add(y); }
   if (ap.scarf) { const s = mesh(new THREE.ConeGeometry(0.09, 0.22, 3), '#d32f2f'); s.position.set(0, 0.42, 0.17); s.rotation.set(Math.PI, 0, 0); upper.add(s);
     const n = mesh(new THREE.TorusGeometry(0.15, 0.03, 6, 14), '#d32f2f'); n.rotation.x = Math.PI / 2; n.position.y = 0.5; upper.add(n); }
   if (ap.style === 'quandoi') { const b = mesh(new THREE.TorusGeometry(0.21, 0.03, 6, 16), '#5a3d1e'); b.rotation.x = Math.PI / 2; b.position.y = 0.05; upper.add(b); }
   const armL = mkLimb(armG, mat(ap.top), -0.24, 0.47), armR = mkLimb(armG, mat(ap.top), 0.24, 0.47);
   [armL, armR].forEach(a => { const h = mesh(new THREE.SphereGeometry(0.065, 8, 6), skin); h.position.y = -0.42; a.add(h); }); upper.add(armL, armR);
-  const head = new THREE.Group(); head.position.y = 0.82; upper.add(head);
+  if (AD) [armL, armR].forEach(a => { a.scale.set(1, 1.3, 1); a.position.y = 0.58; });
+  const HEADY = AD ? 0.86 : 0.82; const head = new THREE.Group(); head.position.y = HEADY; if (AD) head.scale.setScalar(0.62); upper.add(head);
   head.add(mesh(new THREE.SphereGeometry(0.3, 20, 16), skin));
   const eyeM = mat('#1d140e', { roughness: 0.3 });
   [-0.1, 0.1].forEach(x => { const e = mesh(new THREE.SphereGeometry(0.04, 8, 6), eyeM); e.position.set(x, 0.0, 0.27); e.scale.set(1, 1.25, 0.6); head.add(e);
-    const hl = mesh(new THREE.SphereGeometry(0.012, 6, 4), '#ffffff', { emissive: '#ffffff' }); hl.position.set(x + 0.012, 0.018, 0.295); head.add(hl);
+    if (AD) return; const hl = mesh(new THREE.SphereGeometry(0.012, 6, 4), '#ffffff', { emissive: '#ffffff' }); hl.position.set(x + 0.012, 0.018, 0.295); head.add(hl);
     const b = mesh(new THREE.CircleGeometry(0.045, 10), new THREE.MeshBasicMaterial({ color: '#f29a9a', transparent: true, opacity: 0.55 })); b.position.set(x * 1.75, -0.08, 0.255); b.rotation.y = x * 2.2; head.add(b); });
   const mouth = mesh(new THREE.TorusGeometry(0.035, 0.008, 4, 10, Math.PI), '#8a3a2a'); mouth.position.set(0, -0.1, 0.285); mouth.rotation.z = Math.PI; head.add(mouth);
   const hm = mat(ap.hairColor, { roughness: 0.55 });
@@ -84,11 +86,11 @@ export function makeAvatar(ap = {}) {
   // held prop slot (broom, beads, incense…)
   const hand = new THREE.Group(); hand.position.y = -0.42; armR.add(hand);
   root.scale.setScalar(ap.scale);
-  const av = { root, legL, legR, armL, armR, upper, head, hand, ap, walk: 0, seat: 0, bow: 0, bowT: 0, wave: 0 };
+  const av = { hip: HIP, headY: HEADY, tagY: AD ? 2.05 : 1.85, root, legL, legR, armL, armR, upper, head, hand, ap, walk: 0, seat: 0, bow: 0, bowT: 0, wave: 0 };
   root.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return av;
 }
-export function setNameTag(av, name, color) { if (av.tag) av.root.remove(av.tag); av.tag = label(name, color); av.tag.position.y = 1.85; av.root.add(av.tag); }
+export function setNameTag(av, name, color) { if (av.tag) av.root.remove(av.tag); av.tag = label(name, color); av.tag.position.y = av.tagY || 1.85; av.root.add(av.tag); }
 export function animateAvatar(av, dt, speed = 0, t = performance.now() / 1000) {
   av.walk += dt * speed * 3.2;
   const s = Math.sin(av.walk) * clamp(speed / 2.5, 0, 1) * 0.7;
@@ -96,15 +98,15 @@ export function animateAvatar(av, dt, speed = 0, t = performance.now() / 1000) {
   if (av.bowT > 0) { av.bowT -= dt; } const bw = av.bowT > 0 ? Math.sin(Math.PI * clamp(1 - av.bowT / 2.2, 0, 1)) : 0;
   av.legL.rotation.x = s - av.seat * 1.45; av.legR.rotation.x = -s - av.seat * 1.45;
   av.root.children.forEach(() => {});
-  av.upper.position.y = 0.5 - av.seat * 0.32 + Math.abs(Math.sin(av.walk)) * 0.03 * clamp(speed, 0, 1);
-  av.legL.position.y = av.legR.position.y = 0.5 - av.seat * 0.32;
+  av.upper.position.y = (av.hip || 0.5) - av.seat * (av.hip > 0.6 ? 0.5 : 0.32) + Math.abs(Math.sin(av.walk)) * 0.03 * clamp(speed, 0, 1);
+  av.legL.position.y = av.legR.position.y = (av.hip || 0.5) - av.seat * (av.hip > 0.6 ? 0.5 : 0.32);
   av.upper.rotation.x = bw * (av.seated ? 1.1 : 0.85);
   const join = (av.seated || av.bowT > 0 || av.pray) ? 1 : 0;
   av.armL.rotation.x = -s * (1 - join) - join * 1.1 - (av.holdUp || 0); av.armR.rotation.x = s * (1 - join) - join * 1.1 - (av.holdUp || 0);
   av.armL.rotation.z = join * 0.55; av.armR.rotation.z = -join * 0.55;
   if (av.sweeping) { av.armR.rotation.x = -0.6 + Math.sin(t * 6) * 0.5; av.armR.rotation.z = -0.2; av.armL.rotation.x = -0.5 + Math.sin(t * 6) * 0.4; }
   av.head.rotation.y = Math.sin(t * 0.5 + av.root.id) * 0.12 * (speed < 0.1 ? 1 : 0);
-  av.head.position.y = 0.82 + Math.sin(t * 2 + av.root.id) * 0.008;
+  av.head.position.y = (av.headY || 0.82) + Math.sin(t * 2 + av.root.id) * 0.008;
 }
 export function bow(av) { av.bowT = 2.2; }
 
@@ -164,17 +166,17 @@ const CSS = `
 .kg-ui *{box-sizing:border-box}.kg-ui .pe{pointer-events:auto}
 .kg-top{position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;display:flex;gap:6px;align-items:flex-start;justify-content:space-between}
 .kg-title{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:14px;padding:6px 12px;box-shadow:0 4px 18px #0003}
-.kg-title b{font-family:Georgia,serif;font-size:17px;color:var(--accent);display:block}.kg-title small{font-size:11px;opacity:.75}
+.kg-title b{font-family:Georgia,serif;font-size:19px;color:var(--accent);display:block}.kg-title small{font-size:13px;opacity:.75}
 .kg-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
-.kg-btn{border:0;border-radius:12px;padding:9px 12px;font:600 14px system-ui;background:var(--panel);color:var(--accent);box-shadow:0 3px 12px #0003;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
+.kg-btn{border:0;border-radius:12px;padding:10px 14px;min-height:48px;min-width:48px;font:600 16px system-ui;background:var(--panel);color:var(--accent);box-shadow:0 3px 12px #0003;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
 .kg-btn:active{transform:scale(.93)}.kg-btn.main{background:var(--accent);color:var(--panelSolid)}
 .kg-acts{position:absolute;right:8px;bottom:max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;align-items:flex-end}
 .kg-acts .row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:62vw}
-#kg-ctx{font-size:16px;padding:12px 18px;animation:kgp 1.2s infinite}@keyframes kgp{50%{box-shadow:0 0 0 6px var(--glow)}}
+#kg-ctx{font-size:19px;padding:14px 22px;min-height:56px;margin-bottom:6px;animation:kgp 1.2s infinite}@keyframes kgp{50%{box-shadow:0 0 0 6px var(--glow)}}
 .kg-joy{position:absolute;width:120px;height:120px;border-radius:50%;background:#ffffff26;border:2px solid #ffffff66;display:none;transform:translate(-50%,-50%)}
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
-.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:11px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
-.kg-toast{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:var(--panel);padding:8px 14px;border-radius:14px;font-size:14px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
+.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:14px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
+.kg-toast{position:absolute;top:96px;left:50%;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
 .kg-feed{position:absolute;left:8px;top:74px;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 .kg-modal{position:absolute;inset:0;background:#0007;display:none;align-items:center;justify-content:center;pointer-events:auto;z-index:20}
@@ -184,13 +186,23 @@ const CSS = `
 .kg-creator{position:absolute;left:0;right:0;bottom:0;max-height:52vh;overflow:auto;background:var(--panelSolid);border-radius:20px 20px 0 0;padding:14px 16px 20px;pointer-events:auto;box-shadow:0 -10px 40px #0005;z-index:15}
 .kg-creator h2{margin:0 0 6px;font:600 20px Georgia,serif;color:var(--accent);text-align:center}
 .kg-row{margin:8px 0}.kg-row>span{font-size:12px;font-weight:700;opacity:.7;display:block;margin-bottom:4px}
-.kg-chips{display:flex;gap:6px;flex-wrap:wrap}.kg-chip{border:2px solid transparent;border-radius:999px;padding:6px 11px;font-size:13px;background:#0000000f;cursor:pointer}
-.kg-chip.on{border-color:var(--accent);background:var(--glow)}.kg-sw{width:30px;height:30px;padding:0;border-radius:50%}
+.kg-chips{display:flex;gap:6px;flex-wrap:wrap}.kg-chip{border:2px solid transparent;border-radius:999px;padding:10px 14px;min-height:44px;font-size:15px;background:#0000000f;cursor:pointer}
+.kg-chip.on{border-color:var(--accent);background:var(--glow)}.kg-sw{width:44px;height:44px;padding:0;border-radius:50%}
 .kg-in{width:100%;padding:10px;border-radius:10px;border:1px solid #0003;font-size:16px;background:#fff8}
 .kg-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .5s;pointer-events:none;z-index:30}
 .kg-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;font-size:10px}.kg-foot a{color:#fff;text-shadow:0 1px 2px #000}
-.kg-map{display:grid;gap:8px}.kg-map button{text-align:left;padding:12px;border-radius:12px;border:1px solid #0002;background:#ffffff80;font-size:15px;cursor:pointer}
+.kg-map{display:grid;gap:8px}.kg-map button{text-align:left;padding:14px;min-height:56px;border-radius:12px;border:1px solid #0002;background:#ffffff80;font-size:17px;cursor:pointer}
 .kg-map small{display:block;opacity:.7;font-size:12px;margin-top:2px}
+
+.kg-icons .kg-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;min-width:58px;line-height:1.1}
+.kg-icons .kg-btn small{font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap}
+.kg-card{font-size:16px}.kg-card p{line-height:1.55}
+.kg-close{position:sticky;top:0;float:right;width:44px;height:44px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
+.kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 17px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
+.kg-qr{margin:10px auto;width:200px;height:200px;border-radius:16px;border:3px dashed var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:repeating-linear-gradient(45deg,#00000008 0 10px,#0000 10px 20px)}
+.kg-qr b{font-size:18px;color:var(--accent)}.kg-qr span{font-size:13px;opacity:.75;text-align:center;padding:0 12px}
+.kg-tut{position:absolute;inset:0;background:#000b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:auto;z-index:25;text-align:center;padding:24px;font-size:19px;line-height:1.5}
+.kg-tut .g{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}.kg-tut .g div{background:#ffffff1a;border-radius:16px;padding:16px;width:min(42vw,220px)}.kg-tut .g i{display:block;font-style:normal;font-size:40px}
 @media (min-width:900px){.kg-acts .row{max-width:520px}}
 `;
 export function makeUI(theme) {
@@ -208,11 +220,15 @@ export function makeUI(theme) {
     root: ui, $,
     toast(s, ms = 2800) { const e = $('kg-toast'); e.textContent = s; e.style.opacity = 1; clearTimeout(api._tt); api._tt = setTimeout(() => e.style.opacity = 0, ms); },
     feed(s) { const f = $('kg-feed'), d = document.createElement('div'); d.textContent = s; f.appendChild(d); setTimeout(() => d.remove(), 7000); while (f.children.length > 4) f.firstChild.remove(); },
-    modal(html, onMount) { $('kg-card').innerHTML = html; $('kg-modal').style.display = 'flex'; onMount && onMount($('kg-card')); },
+    modal(html, onMount) { $('kg-card').innerHTML = '<button class="kg-close" aria-label="Đóng" title="Đóng (Esc)">×</button>' + html; $('kg-card').querySelector('.kg-close').onclick = () => api.close(); $('kg-modal').style.display = 'flex'; onMount && onMount($('kg-card')); },
     close() { $('kg-modal').style.display = 'none'; },
     button(parent, text, fn, main) { const b = document.createElement('button'); b.className = 'kg-btn pe' + (main ? ' main' : ''); b.innerHTML = text; b.onclick = (e) => { e.stopPropagation(); fn(b); }; $(parent).appendChild(b); return b; },
+    tutorial(id, steps) { if (localStorage.getItem('kg_tut_' + id)) return; const d = document.createElement('div'); d.className = 'kg-tut';
+      d.innerHTML = `<b style="font-size:24px">Cách đi lại</b><div class="g">${steps.map(s => `<div><i>${s[0]}</i>${s[1]}</div>`).join('')}</div><button class="kg-btn main" style="font-size:20px;padding:14px 28px">Đã hiểu</button>`;
+      const off = () => { d.remove(); localStorage.setItem('kg_tut_' + id, 1); }; d.querySelector('button').onclick = off; addEventListener('keydown', function k(e) { if (e.key === 'Escape') { off(); removeEventListener('keydown', k); } }); ui.appendChild(d); },
     async fade(fn) { const f = $('kg-fade'); f.style.opacity = 1; await new Promise(r => setTimeout(r, 500)); await fn(); f.style.opacity = 0; },
   };
+  addEventListener('keydown', e => { if (e.key === 'Escape' && $('kg-modal').style.display === 'flex') { api.close(); api.onEsc?.(); } });
   $('kg-modal').addEventListener('click', (e) => { if (e.target.id === 'kg-modal') api.close(); });
   return api;
 }
@@ -235,7 +251,7 @@ export function createWorld(cfg) {
 
   const W = { THREE, scene, camera, renderer, sun, hemi, updates: [], colliders: [], interacts: [], npcs: [], heightAt: cfg.heightAt || (() => 0), walkable: cfg.walkable || (() => true), time: 0, frozen: false };
   // player
-  const P = W.player = { pos: new THREE.Vector3(...(cfg.spawn || [0, 0, 0])), yaw: cfg.spawnYaw || 0, camYaw: (cfg.spawnYaw || 0) + Math.PI, camPitch: 0.32, camDist: isMobile ? 6.2 : 5.5, speed: 0, av: null, seatedAt: null, riding: null };
+  const P = W.player = { pos: new THREE.Vector3(...(cfg.spawn || [0, 0, 0])), yaw: cfg.spawnYaw || 0, camYaw: (cfg.spawnYaw || 0) + Math.PI, camPitch: 0.34, camDist: isMobile ? 7.2 : 6.5, speed: 0, av: null, seatedAt: null, riding: null };
   W.setAvatar = (ap, name) => { if (P.av) scene.remove(P.av.root); P.av = makeAvatar(ap); setNameTag(P.av, name, cfg.meColor || '#ffe08a'); scene.add(P.av.root); P.name = name; };
   // input
   const keys = {}; addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'KeyE') W.ui?.$('kg-ctx').click(); }); addEventListener('keyup', e => keys[e.code] = false);
@@ -260,12 +276,13 @@ export function createWorld(cfg) {
   }
   W.addInteract = (o) => { W.interacts.push(o); return o; };
   W.onUpdate = (f) => W.updates.push(f);
-  W.teleport = (x, z, yaw) => { P.pos.set(x, W.heightAt(x, z), z); if (yaw !== undefined) { P.yaw = yaw; P.camYaw = yaw + Math.PI; } standUp(); };
+  W.teleport = (x, z, yaw) => { tmp.set(x, 0, z); collide(tmp); collide(tmp); x = tmp.x; z = tmp.z; P.pos.set(x, W.heightAt(x, z), z); first = true; if (yaw !== undefined) { P.yaw = yaw; P.camYaw = yaw + Math.PI; } standUp(); };
   function standUp() { if (P.av) { P.av.seated = false; } P.seatedAt = null; }
   W.standUp = standUp;
   W.sit = (pos, yaw) => { P.pos.copy(pos); P.yaw = yaw; P.av.seated = true; P.seatedAt = pos.clone(); };
   // camera initial
-  const camT = new THREE.Vector3(), camP = new THREE.Vector3(); let first = true;
+  const camT = new THREE.Vector3(), camP = new THREE.Vector3(), rcDir = new THREE.Vector3(), ray = new THREE.Raycaster(); let first = true;
+  W.occluders = []; W.addOccluder = (...o) => { W.occluders.push(...o); return o[0]; };
   const tmp = new THREE.Vector3(); let last = performance.now(), ctxCur = null;
   function step(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now; W.time += dt;
@@ -285,6 +302,7 @@ export function createWorld(cfg) {
       if (!P.av.seated) P.pos.y += (W.heightAt(P.pos.x, P.pos.z) - P.pos.y) * Math.min(1, dt * 15);
     }
     if (P.riding) P.riding(dt);
+    if (cfg.saveKey && P.av && !W.frozen && !P.riding && !P.av.seated && (W._sv = (W._sv || 0) + dt) > 3) { W._sv = 0; try { localStorage.setItem('kg_pos_' + cfg.saveKey, JSON.stringify([+P.pos.x.toFixed(2), +P.pos.z.toFixed(2), +P.yaw.toFixed(2)])); } catch { } }
     if (P.av) { P.av.root.position.copy(P.pos); P.av.root.rotation.y = P.yaw; animateAvatar(P.av, dt, P.speed, W.time); }
     // npcs
     for (const n of W.npcs) n.update(dt);
@@ -298,11 +316,17 @@ export function createWorld(cfg) {
     const cd = P.camDist, cy = P.camYaw, cp = P.camPitch;
     camP.set(camT.x + Math.sin(cy) * Math.cos(cp) * cd, camT.y + Math.sin(cp) * cd, camT.z + Math.cos(cy) * Math.cos(cp) * cd);
     if (W.camLimit) W.camLimit(camP, camT);
+    if (W.occluders.length) { rcDir.subVectors(camP, camT); const L = rcDir.length(); rcDir.normalize(); ray.set(camT, rcDir); ray.far = L;
+      const hit = ray.intersectObjects(W.occluders, true).find(h => h.object.visible && h.object.material && !(h.object.material.transparent && h.object.material.opacity < 0.5) && !h.object.userData.noOcc);
+      if (hit) camP.copy(camT).addScaledVector(rcDir, Math.max(0.6, hit.distance - 0.35)); }
     if (first) { camera.position.copy(camP); first = false; } else camera.position.lerp(camP, Math.min(1, dt * 8));
     camera.lookAt(camT);
     sun.position.set(P.pos.x + (cfg.sunDir || [20, 30, 10])[0], (cfg.sunDir || [20, 30, 10])[1], P.pos.z + (cfg.sunDir || [20, 30, 10])[2]); sun.target.position.copy(P.pos);
     renderer.render(scene, camera); requestAnimationFrame(step);
   }
+  W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
+  // PWA
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -332,7 +356,7 @@ export function followPet(pet, target, yaw, dt, W) {
 }
 
 /* ---------------- creator (try-on: avatar shown in the live world) ---------------- */
-export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Không' }, hairs = HAIRS, pets, defaults = {}, namePH = 'Tên hiển thị', extraNote = '' }) {
+export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Không' }, hairs = HAIRS, pets, defaults = {}, namePH = 'Tên hiển thị', extraNote = '', goLabel = 'Vào thôi' }) {
   return new Promise((resolve) => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key)); } catch { }
     const st = saved || { name: '', skin: SKINS[0], hair: 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
@@ -345,7 +369,7 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
       <div class="kg-row"><span>Trang phục</span><div class="kg-chips">${chips('outfit', Object.fromEntries(outfits.map(o => [o.id, o.label])))}</div></div>
       ${Object.keys(hats).length > 1 ? `<div class="kg-row"><span>Phụ kiện</span><div class="kg-chips">${chips('hat', hats)}</div></div>` : ''}
       ${pets ? `<div class="kg-row"><span>Bạn đồng hành</span><div class="kg-chips">${chips('pet', pets)}</div></div>` : ''}
-      <button class="kg-btn main" id="kgc-go" style="width:100%;margin-top:10px;font-size:17px;padding:13px">Vào thôi</button>`;
+      <button class="kg-btn main" id="kgc-go" style="width:100%;margin-top:10px;font-size:17px;padding:13px">${goLabel}</button>`;
     ui.root.appendChild(box);
     const refresh = () => { W.setAvatar(apOf(), st.name || 'Bạn'); W.setPet?.(st.pet); };
     box.addEventListener('click', e => { const b = e.target.closest('.kg-chip'); if (!b) return; st[b.dataset.f] = b.dataset.v; box.querySelectorAll(`[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle('on', x === b)); W.sound?.init(); W.sound?.tone(880, 0.2, 0.05); refresh(); });
@@ -367,8 +391,8 @@ export function shareInvite(ui, { name, text, place }) {
   const u = new URL(location.href); u.search = ''; u.searchParams.set('ref', name || 'ban'); if (place) u.searchParams.set('o', place); const url = u.toString();
   const msg = `${text} ${url}`;
   if (navigator.share) navigator.share({ title: document.title, text, url }).catch(() => { });
-  else navigator.clipboard?.writeText(msg).then(() => ui.toast('Đã chép link mời, gửi cho bạn bè nhé!')).catch(() => ui.toast(url, 6000));
-  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
+  else navigator.clipboard?.writeText(msg).then(() => { const n = ui.$('kg-card').querySelector('#kg-copied'); if (n) n.textContent = '✓ Đã chép link'; }).catch(() => { });
+  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
   <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`);
 }
 export function refGreeting(ui, fmt) { const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => ui.toast(fmt(r.slice(0, 20)), 5000), 1500); }
@@ -403,3 +427,10 @@ export function reader(ui, { title, sub, lines, beat = 2.2, onLine, onEnd }) {
       rd.children[i]?.scrollIntoView({ block: 'center', behavior: 'smooth' }); onLine?.(i, lines[i]); i++; if (i < lines.length) setTimeout(go, beat * 1000); else setTimeout(() => onEnd?.(), beat * 1000); }; go(); });
 }
 export function stats(ui, id) { const k = 'kg_stats_' + id; let s = {}; try { s = JSON.parse(localStorage.getItem(k)) || {}; } catch { } return { s, add(n, v = 1) { s[n] = (s[n] || 0) + v; localStorage.setItem(k, JSON.stringify(s)); return s[n]; } }; }
+
+/* ---------------- công đức QR placeholder + Bè Gỗ link ---------------- */
+export const BEGO_URL = 'https://facebook.com/begotrensong';
+export function begoButton(text = 'Ghé Bè Gỗ Trên Sông') { return `<a class="kg-bego" href="${BEGO_URL}" target="_blank" rel="noopener">🪵 ${text} ↗</a>`; }
+export function qrPlaceholder(note = 'Mã QR chuyển khoản công đức đang được chuẩn bị') { return `<div class="kg-qr" role="img" aria-label="Sắp có mã QR"><span style="font-size:40px">▦</span><b>Sắp có mã QR</b><span>${note}</span></div>`; }
+export function doneCard(ui, { title = 'Hoàn thành', msg = '', icon = '🌸' }) { ui.modal(`<h2>${icon} ${title}</h2><p style="text-align:center">${msg}</p>${begoButton()}<button class="kg-btn" style="width:100%;margin-top:8px" onclick="this.closest('.kg-modal').style.display='none'">Tiếp tục</button>`); }
+export const MOVE_TUT = isMobile ? [['👈', 'Đặt ngón tay bên <b>trái</b> màn hình và kéo để đi'], ['👉', 'Vuốt bên <b>phải</b> màn hình để xoay nhìn'], ['👆', 'Chạm nút lớn phía dưới để tương tác']] : [['⌨️', 'Phím <b>W A S D</b> hoặc mũi tên để đi'], ['🖱️', 'Kéo chuột để xoay nhìn, lăn chuột để xa/gần'], ['E', 'Phím <b>E</b> để tương tác · <b>Esc</b> để đóng hộp thoại']];

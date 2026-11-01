@@ -11,6 +11,7 @@ async def run(p,n,video):
   await pg.goto(f'http://localhost:8099/{n}/index.html');await pg.wait_for_timeout(6000)
   await pg.screenshot(path=f'{n}/shot_creator.png')
   await pg.fill('#kgc-name','Anh');await pg.click('#kgc-go');await pg.wait_for_timeout(1500)
+  if await pg.query_selector('.kg-tut'): await pg.click('.kg-tut button')
   for st in SCRIPTS[n]:
     if st[0]=='js': await pg.evaluate(st[1])
     elif st[0]=='wait': await pg.wait_for_timeout(st[1])

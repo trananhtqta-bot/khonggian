@@ -1,9 +1,9 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
-const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#d9c3c0', '#3a3a40', 0.9], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
+const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
 const S = W.sound = new Sound();
-const ui = W.ui = makeUI({ title: 'Tri Ân Liệt Sĩ', sub: '<span id="online">…</span>', accent: '#8a2a20', panel: '#f6efe2d9', panelSolid: '#f6efe2', glow: '#f2c46a44', footer: 'Uống nước nhớ nguồn' });
+const ui = W.ui = makeUI({ title: 'Tri Ân Liệt Sĩ', sub: 'Nghĩa trang liệt sĩ · thắp nén hương tri ân', accent: '#8a2a20', panel: '#f6efe2d9', panelSolid: '#f6efe2', glow: '#f2c46a44', footer: 'Uống nước nhớ nguồn' });
 const ST = stats(ui, 'trian');
 
 // ground
@@ -58,11 +58,13 @@ W.onUpdate((dt, t) => { offerings.children.forEach(s => { if (s.userData.life ==
 // pre-place some offerings by earlier visitors
 graves.forEach((g, i) => { if (i % 5 === 0) flowers(g.x + 0.35, g.z - 0.55, 0.35); if (i % 7 === 0) incense(g.x - 0.3, g.z - 0.6, 0.35); });
 
+// soft fill light that follows the visitor so faces/clothes stay readable at dusk
+{ const fill = new THREE.PointLight('#fff1e0', 9, 14, 1.4); W.scene.add(fill); W.onUpdate(() => { const P = W.player.pos; fill.position.set(P.x, P.y + 3, P.z + 2.5); }); }
 // visitors (quiet, slow)
 const NAMES = ['Bác Hòa', 'Cô Lan', 'Anh Dũng', 'Chị Mai', 'Ông Tư', 'Cháu Minh', 'Bà Sáu', 'Đoàn viên Quang'];
-const vAp = () => ({ skin: pick(['#f0cfa8', '#d9a77c', '#e8bf96']), hair: pick(['ngan', 'bui', 'ngan']), top: pick(['#f4f1ea', '#2b2b30', '#f4f1ea', '#3a4a6a']), bottom: pick(['#2b2b30', '#1e2a40']), style: 'ao', hat: 'none' });
-const vSpots = graves.filter((g, i) => i % 6 === 0).map(g => [g.x, g.z + 1.4, Math.PI, 'stand']);
-for (let i = 0; i < (isMobile ? 5 : 8); i++) addNPC(W, { name: NAMES[i], ap: vAp(), area: [-4, 4, -45, 38], spots: [...vSpots, [0, 4.2, Math.PI, 'stand']], speed: 0.9 });
+const vAp = () => ({ skin: pick(['#f0cfa8', '#d9a77c', '#e8bf96']), hair: pick(['ngan', 'bui', 'ngan']), top: pick(['#f4f1ea', '#2b2b30', '#f4f1ea', '#3a4a6a']), bottom: pick(['#2b2b30', '#1e2a40']), style: 'ao', hat: 'none', adult: true });
+const vSpots = [-10, -20, -30, -40].flatMap(z => [[-2.2, z, -Math.PI / 2, 'stand'], [2.2, z, Math.PI / 2, 'stand']]); // stay on the avenue, never on graves
+for (let i = 0; i < (isMobile ? 5 : 8); i++) addNPC(W, { name: NAMES[i], ap: vAp(), area: [-4, 4, -45, 38], spots: [...vSpots, [0, 4.2, Math.PI, 'stand']], speed: 0.9 }); // (visitors walk only along the central avenue)
 
 // nearest grave interaction
 const G = { pos: { x: 0, z: 0 }, r: 1.9, label: '🕯️ Thắp hương', use: () => doIncense() };
@@ -83,19 +85,19 @@ ui.button('kg-acts', '💐 Đặt hoa', () => { if (!near) return ui.toast('Hãy
 ui.button('kg-acts', '🙇 Mặc niệm', () => silence());
 ui.button('kg-acts', '📜 Thơ', () => reader(ui, { title: 'Lời tưởng niệm', sub: 'Đọc chậm, nhẹ', lines: ['Các anh đã nằm xuống', 'cho đất nước đứng lên,', 'cho tiếng cười trẻ thơ', 'vang trên mỗi con đường.', 'Hôm nay chúng con về đây,', 'thắp nén hương thơm,', 'lặng lẽ nói lời cảm ơn', 'mà cả đời không nói hết.'], beat: 3.2, onLine: () => S.pluck(220, 0, 0.05), onEnd: () => S.bell(98, 0.12) }));
 function silence() { const a = W.player.av; W.frozen = true; a.pray = true; S.stopMusic(); let n = 60; ui.modal(`<h2>Phút mặc niệm</h2><p style="text-align:center;font-size:48px;margin:8px" id="sl">60</p><p style="text-align:center;opacity:.7">Đứng nghiêm, cúi đầu tưởng nhớ</p><button class="kg-btn" id="st" style="width:100%">Kết thúc</button>`, c => { const end = () => { clearInterval(iv); W.frozen = false; a.pray = false; ui.close(); bow(a); S.bell(98, 0.2); ST.add('macniem'); startMusic(); }; c.querySelector('#st').onclick = end; const iv = setInterval(() => { n--; const e = c.querySelector('#sl'); if (e) e.textContent = n; if (n % 15 === 0) S.bell(82, 0.08); if (n <= 0) end(); }, 1000); }); S.bell(82, 0.15); }
-const icons = (t, f) => ui.button('kg-icons', t, f);
-icons('🗺️', () => mapView(W, ui, [{ label: 'Cổng nghĩa trang', icon: '⛩️', desc: 'Lối vào', pos: [0, 40], yaw: Math.PI }, { label: 'Đài tưởng niệm', icon: '🕯️', desc: 'Dâng hương chung', pos: [0, 5], yaw: Math.PI }, { label: 'Khu mộ', icon: '🪦', desc: 'Thắp hương, đặt hoa, quét lá', pos: [6, -12.5], yaw: Math.PI }, { label: 'Tường tri ân', icon: '✍️', desc: 'Khắc lời tưởng nhớ', pos: [0, -46], yaw: Math.PI }], 'Sơ đồ nghĩa trang'));
-icons('📊', () => { const s = ST.s; ui.modal(`<h2>Hành trình tri ân</h2><div style="font-size:15px;line-height:2">🕯️ Nén hương: <b>${s.huong || 0}</b><br>💐 Bó hoa: <b>${s.hoa || 0}</b><br>🙇 Phút mặc niệm: <b>${s.macniem || 0}</b><br>🧹 Quét lá: <b>${s.quet || 0}</b><br>✍️ Lời tri ân: <b>${s.loi || 0}</b></div>`); });
-icons('💌', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} mời bạn cùng thắp một nén hương tri ân các anh hùng liệt sĩ.`, place: 'trian' }));
-icons('🔊', b => { if (S.musicOn) { S.stopMusic(); b.textContent = '🔇'; } else { startMusic(); b.textContent = '🔊'; } });
+const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
+icons('🗺️', 'Bản đồ', () => mapView(W, ui, [{ label: 'Cổng nghĩa trang', icon: '⛩️', desc: 'Lối vào', pos: [0, 40], yaw: Math.PI }, { label: 'Đài tưởng niệm', icon: '🕯️', desc: 'Dâng hương chung', pos: [0, 5], yaw: Math.PI }, { label: 'Khu mộ', icon: '🪦', desc: 'Thắp hương, đặt hoa, quét lá', pos: [4.6, -24], yaw: Math.PI / 2 }, { label: 'Tường tri ân', icon: '✍️', desc: 'Khắc lời tưởng nhớ', pos: [0, -46], yaw: Math.PI }], 'Sơ đồ nghĩa trang'));
+icons('📊', 'Hành trình', () => { const s = ST.s; ui.modal(`<h2>Hành trình tri ân</h2><div style="font-size:15px;line-height:2">🕯️ Nén hương: <b>${s.huong || 0}</b><br>💐 Bó hoa: <b>${s.hoa || 0}</b><br>🙇 Phút mặc niệm: <b>${s.macniem || 0}</b><br>🧹 Quét lá: <b>${s.quet || 0}</b><br>✍️ Lời tri ân: <b>${s.loi || 0}</b></div>`); });
+icons('💌', 'Mời viếng', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} mời bạn cùng thắp một nén hương tri ân các anh hùng liệt sĩ.`, place: 'trian' }));
+icons('🔊', 'Âm thanh', b => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.music({ scale: [0, 3, 5, 7, 10], root: 196, beat: 1.6, inst: 'flute', gong: 12, rest: 0.5 }); }
-const online = () => { const e = document.getElementById('online'); if (e) e.textContent = `${60 + (Math.random() * 25 | 0)} người đang tưởng niệm`; }; online(); setInterval(online, 10000);
-setInterval(() => ui.feed(pick([`${pick(NAMES)} vừa thắp hương`, `${pick(NAMES)} đặt một bó hoa cúc trắng`, `${pick(NAMES)} viết lời tri ân`])), 14000);
+// (no simulated online counter / activity feed — this is a place of remembrance)
 
 let amb = false; W.onFirstInput = () => { if (amb) return; amb = true; S.init(); S.ambient('wind', 0.12); startMusic(); };
 W.start(); document.getElementById('load').style.opacity = 0; setTimeout(() => document.getElementById('load').remove(), 900);
 refGreeting(ui, r => `${r} mời bạn cùng thắp hương tri ân`);
-await avatarCreator(W, ui, { key: 'kg_av_trian', title: 'Trang phục viếng', outfits: [{ id: 'trang', label: 'Áo sơ mi trắng', ap: { top: '#f4f1ea', bottom: '#2b2b30', style: 'ao' } }, { id: 'den', label: 'Áo sẫm màu', ap: { top: '#2b2b30', bottom: '#2b2b30', style: 'ao' } }, { id: 'aodai', label: 'Áo dài trắng', ap: { top: '#f4f1ea', bottom: '#f4f1ea', style: 'aodai' } }, { id: 'quandoi', label: 'Quân phục cựu chiến binh', ap: { top: '#5a6a3a', bottom: '#5a6a3a', style: 'quandoi' } }, { id: 'doanvien', label: 'Áo xanh tình nguyện', ap: { top: '#2f7fd0', bottom: '#2b2b30', style: 'ao' } }],
-  hats: { none: 'Không', nonla: 'Nón lá' } });
+await avatarCreator(W, ui, { key: 'kg_av_trian', title: 'Trang phục viếng', outfits: [{ id: 'trang', label: 'Sơ mi trắng, quần sẫm', ap: { top: '#f4f1ea', bottom: '#24242a', style: 'ao', adult: true } }, { id: 'den', label: 'Trang phục sẫm màu', ap: { top: '#26262c', bottom: '#26262c', style: 'ao', adult: true } }, { id: 'aodai', label: 'Áo dài trắng', ap: { top: '#f4f1ea', bottom: '#f4f1ea', style: 'aodai', adult: true } }, { id: 'aodaiden', label: 'Áo dài đen', ap: { top: '#1f1f24', bottom: '#1f1f24', style: 'aodai', adult: true } }, { id: 'quandoi', label: 'Quân phục cựu chiến binh', ap: { top: '#5a6a3a', bottom: '#5a6a3a', style: 'quandoi', adult: true } }],
+  hats: { none: 'Không', nonla: 'Nón lá' }, hairs: { ngan: 'Tóc ngắn', bui: 'Tóc búi', dai: 'Tóc dài' }, goLabel: 'Vào viếng' });
 if (!amb) W.onFirstInput();
+W.restorePos(); ui.tutorial('move', MOVE_TUT);
 window.__W = W;

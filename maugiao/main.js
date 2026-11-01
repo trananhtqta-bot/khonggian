@@ -1,9 +1,9 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
 const walkable = (x, z) => x > -21 && x < 21 && z > -25 && z < 19;
-const W = createWorld({ fog: ['#f6e6c8', 30, 110], sky: ['#8fc6e8', '#fdf0d4', '#fff1c0'], hemi: ['#fff6e0', '#7a8f4a', 1.3], sun: ['#fff0cc', 2.3], sunDir: [18, 30, 22], spawn: [0, 0, 15], spawnYaw: Math.PI, heightAt: (x, z) => inside(x, z) ? 0.15 : 0, walkable, meColor: '#ffd36b' });
+const W = createWorld({ fog: ['#f6e6c8', 30, 110], sky: ['#8fc6e8', '#fdf0d4', '#fff1c0'], hemi: ['#fff6e0', '#7a8f4a', 1.3], sun: ['#fff0cc', 2.3], sunDir: [18, 30, 22], spawn: [-1.6, 0, 10.5], spawnYaw: Math.PI, saveKey: 'mg', heightAt: (x, z) => inside(x, z) ? 0.15 : 0, walkable, meColor: '#ffd36b' });
 const S = W.sound = new Sound();
 const ui = W.ui = makeUI({ title: 'Lớp Mẫu Giáo Ngày Xưa', sub: '<span id="phase">Giờ học</span> · <span id="online">…</span>', accent: '#c0392b', panel: '#fff8e8d9', panelSolid: '#fff8e8', glow: '#ffc85a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
 const ST = stats(ui, 'mg');
@@ -22,14 +22,14 @@ const ST = stats(ui, 'mg');
   const rail = (x, z, w, d) => { const r = mesh(new THREE.BoxGeometry(w, 0.08, d), '#3f7fb5'); r.position.set(x, 0.9, z); W.scene.add(r); }; rail(-11.5, 19, 19, 0.08); rail(11.5, 19, 19, 0.08); rail(0, -25, 42, 0.08); rail(-21, -3, 0.08, 44); rail(21, -3, 0.08, 44);
   // gate arch (fictional school name)
   const c = document.createElement('canvas'); c.width = 1024; c.height = 160; const g = c.getContext('2d'); g.fillStyle = '#fff3d6'; g.fillRect(0, 0, 1024, 160); g.fillStyle = '#c0392b'; g.font = 'bold 64px Georgia,serif'; g.textAlign = 'center'; g.fillText('TRƯỜNG MẪU GIÁO HOA PHƯỢNG', 512, 100); g.fillStyle = '#3f7fb5'; g.font = '30px Georgia'; g.fillText('Bé ngoan · Học giỏi · Vâng lời cô', 512, 145);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const b = mesh(new THREE.PlaneGeometry(6, 0.95), new THREE.MeshStandardMaterial({ map: t, side: THREE.DoubleSide })); b.position.set(0, 3.2, 19); b.rotation.y = Math.PI; W.scene.add(b);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const bd = mesh(new THREE.BoxGeometry(6.1, 1.05, 0.12), '#c99a5a'); bd.position.set(0, 3.2, 19); W.scene.add(bd); [1, -1].forEach(sd => { const b = mesh(new THREE.PlaneGeometry(6, 0.95), new THREE.MeshStandardMaterial({ map: t })); b.position.set(0, 3.2, 19 + sd * 0.07); b.rotation.y = sd > 0 ? 0 : Math.PI; W.scene.add(b); }); // readable from both sides, never mirrored
   [-2.6, 2.6].forEach(x => { const p = mesh(new THREE.BoxGeometry(0.5, 3.8, 0.5), '#e8c27a'); p.position.set(x, 1.9, 19); W.scene.add(p); W.addCollider(x, 19, 0.35); }); }
 
 // ---------- classroom building ----------
 const roofG = new THREE.Group(), frontWall = new THREE.Group();
 { const wallM = mat('#f2cf6b'), trim = mat('#e9e2cf'); const H = 3.2;
   const wall = (x, z, w, d, grp = W.scene) => { const m = mesh(new THREE.BoxGeometry(w, H, d), wallM); m.position.set(x, H / 2, z); grp.add(m); return m; };
-  wall(0, B.z0, 16, 0.3); wall(B.x0, -18, 0.3, 12); wall(B.x1, -18, 0.3, 12);
+  W.addOccluder(wall(0, B.z0, 16, 0.3), wall(B.x0, -18, 0.3, 12), wall(B.x1, -18, 0.3, 12)); W.addOccluder(frontWall);
   // front wall with door gap x∈[-1.2,1.2] and windows
   wall(-4.6, B.z1, 6.8, 0.3, frontWall); wall(4.6, B.z1, 6.8, 0.3, frontWall); const top = mesh(new THREE.BoxGeometry(2.4, 0.8, 0.3), wallM); top.position.set(0, H - 0.4, B.z1); frontWall.add(top); W.scene.add(frontWall);
   [-5, -2.8, 2.8, 5].forEach(x => { const w = mesh(new THREE.BoxGeometry(1.4, 1.2, 0.34), '#3f7fb5'); w.position.set(x, 1.8, B.z1); frontWall.add(w); });
@@ -125,7 +125,7 @@ function drumRoll() { [0, 0.5, 1.0].forEach(d => setTimeout(() => { S.drum(); dr
 
 // ---------- stickers (bông hoa bé ngoan) ----------
 const flowersSt = () => ST.s.hoa || 0;
-function giveFlower(why) { ST.add('hoa'); drawChart(); S.chime(); ui.toast(`🌸 Cô tặng bé 1 bông hoa bé ngoan · ${why}`, 3000); ui.feed(`${W.player.name} được bông hoa bé ngoan`); }
+function giveFlower(why) { ST.add('hoa'); drawChart(); S.chime(); doneCard(ui, { icon: '🌸', title: 'Cô tặng bé 1 bông hoa', msg: `Vì bé ${why}. Bé có ${ST.s.hoa || 0} bông hoa bé ngoan rồi!` }); ui.feed(`${W.player.name} được bông hoa bé ngoan`); }
 function drawChart() { const g = chartC.getContext('2d'); g.fillStyle = '#fff8e6'; g.fillRect(0, 0, 512, 512); g.fillStyle = '#c0392b'; g.font = 'bold 44px Georgia'; g.textAlign = 'center'; g.fillText('BÉ NGOAN', 256, 60); g.textAlign = 'left'; g.font = '28px Georgia'; const names = [W.player.name || 'Bé', ...KIDN.slice(0, 5)];
   names.forEach((n, i) => { g.fillStyle = '#333'; g.fillText(n, 20, 120 + i * 66); const k = i === 0 ? Math.min(10, flowersSt()) : (i * 3 + 2) % 7; for (let j = 0; j < k; j++) { g.fillStyle = ['#ff6b8b', '#ff8c42', '#ffd93b'][j % 3]; g.beginPath(); g.arc(180 + j * 32, 110 + i * 66, 12, 0, 7); g.fill(); } }); chartT.needsUpdate = true; }
 
@@ -152,20 +152,20 @@ function stopSweep() { scraps.active = false; W.player.av.sweeping = false; if (
 const sweepI = W.addInteract({ pos: { x: -6.8, z: -13.4 }, r: 1.6, label: '🧹 Trực nhật · quét lớp', use: () => { if (scraps.active) return stopSweep(); scraps.active = true; W.player.av.sweeping = true; held = broom(); W.player.av.hand.add(held); rack.visible = false; sweepI.label = '✋ Cất chổi'; ui.toast(`Quét ${scraps.left} mẩu giấy vụn trong lớp nhé`); } });
 
 // ---------- inside view handling ----------
-let wasIn = false; W.onUpdate(() => { const P = W.player, i = inside(P.pos.x, P.pos.z) || (P.pos.z < -10 && Math.abs(P.pos.x) < 8.5 && P.pos.z > -24); if (i !== wasIn) { wasIn = i; roofG.visible = !i; frontWall.children.forEach(m => { m.material = m.material.clone(); m.material.transparent = i; m.material.opacity = i ? 0.25 : 1; }); P.camDist = i ? 4.2 : (isMobile ? 6.2 : 5.5); P.camPitch = i ? 0.55 : 0.32; } });
-W.camLimit = (c, t) => { if (wasIn) { c.x = Math.max(B.x0 + 0.4, Math.min(B.x1 - 0.4, c.x)); c.z = Math.max(B.z0 + 0.4, c.z); c.y = Math.min(c.y, 3.4); } };
+let wasIn = false; W.onUpdate(() => { const P = W.player, i = inside(P.pos.x, P.pos.z) || (P.pos.z < -10 && Math.abs(P.pos.x) < 8.5 && P.pos.z > -24); if (i !== wasIn) { wasIn = i; roofG.visible = !i; frontWall.children.forEach(m => { m.material = m.material.clone(); m.material.transparent = i; m.material.opacity = i ? 0.25 : 1; }); P.camDist = i ? 4.6 : (isMobile ? 7.2 : 6.5); P.camPitch = i ? 0.6 : 0.34; } });
+W.camLimit = (c, t) => { if (wasIn) { c.x = Math.max(B.x0 + 0.4, Math.min(B.x1 - 0.4, c.x)); c.z = Math.min(B.z1 - 0.4, Math.max(B.z0 + 0.4, c.z)); c.y = Math.min(c.y, 3.0); } };
 
 // ---------- action bar ----------
 const DONGDAO = { 'Nu na nu nống': ['Nu na nu nống', 'Cái cống nằm trong', 'Cái ong nằm ngoài', 'Củ khoai chấm mật', 'Phật ngồi Phật khóc', 'Con cóc nhảy ra', 'Con gà ú ụ', 'Nhà mụ thổi xôi', 'Nhà tôi nấu chè', 'Tè he chân rụt!'], 'Chi chi chành chành': ['Chi chi chành chành', 'Cái đanh thổi lửa', 'Con ngựa chết trương', 'Ba vương ngũ đế', 'Bắt dế đi tìm', 'Ù à ù ập!'], 'Dung dăng dung dẻ': ['Dung dăng dung dẻ', 'Dắt trẻ đi chơi', 'Đến ngõ nhà trời', 'Lạy cậu lạy mợ', 'Cho cháu về quê', 'Cho dê đi học', 'Cho cóc ở nhà', 'Cho gà bới bếp', 'Ngồi xệp xuống đây!'], 'Rồng rắn lên mây': ['Rồng rắn lên mây', 'Có cây lúc lắc', 'Hỏi thăm thầy thuốc', 'Có nhà hay không?'] };
 ui.button('kg-acts', '🎵 Đồng dao', () => ui.modal(`<h2>Hát đồng dao</h2>${Object.keys(DONGDAO).map(k => `<button class="kg-btn" data-k="${k}" style="width:100%;margin:4px 0">${k}</button>`).join('')}`, c => c.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { ui.close(); const k = b.dataset.k; let n = 0; reader(ui, { title: k, sub: 'Vỗ tay theo nhịp nào! 👏', lines: DONGDAO[k], beat: 1.6, onLine: () => { S.pluck([523, 587, 659, 784, 880][n++ % 5]); S.drum(0.3); W.player.av.holdUp = !W.player.av.holdUp; }, onEnd: () => { W.player.av.holdUp = false; ST.add('dongdao'); if ((ST.s.dongdao || 0) % 2 === 1) giveFlower('thuộc bài đồng dao'); } }); })));
 ui.button('kg-acts', '🙋 Giơ tay', () => { const a = W.player.av; a.holdUp = true; S.pluck(880); setTimeout(() => a.holdUp = false, 1600); if (phase === 0 && W.player.av.seated) { ui.toast('Cô gọi bé lên… trả lời đúng rồi! 👏'); setTimeout(() => giveFlower('phát biểu xây dựng bài'), 1500); } });
 ui.button('kg-acts', '👏 Vỗ tay', () => { bow(W.player.av); [0, 200, 400].forEach(d => setTimeout(() => S.noise(0.05, 0.25, 3000), d)); });
-const icons = (t, f) => ui.button('kg-icons', t, f);
-icons('🗺️', () => mapView(W, ui, [{ label: 'Cổng trường', desc: 'Nơi mẹ đưa bé tới', icon: '🏫', pos: [0, 16], yaw: Math.PI }, { label: 'Lớp học', desc: 'Bảng đen, bàn ghế, cô Hiền', icon: '📚', pos: [0, -14], yaw: Math.PI }, { label: 'Gốc phượng', desc: 'Ghế đá dưới tán hoa đỏ', icon: '🌳', pos: [PHUONG.x + 2.4, PHUONG.z + 2], yaw: -2.3 }, { label: 'Sân chơi', desc: 'Xích đu, cầu trượt', icon: '🛝', pos: [SWING.x + 1, SWING.z + 3], yaw: Math.PI }, { label: 'Trống trường', desc: 'Đánh trống chuyển giờ', icon: '🥁', pos: [DRUM.x, DRUM.z + 2], yaw: Math.PI }, { label: 'Vườn hoa & bàn ăn', desc: 'Tưới cây, ăn trưa', icon: '🌼', pos: [BED.x + 3.5, BED.z + 2], yaw: Math.PI }], 'Sơ đồ trường'));
-icons('🌸', () => { drawChart(); ui.modal(`<h2>Bông hoa bé ngoan</h2><p style="text-align:center;font-size:40px;margin:6px">${'🌸'.repeat(Math.min(10, flowersSt())) || '·'}</p><p style="text-align:center">Bé có <b>${flowersSt()}</b> bông · ${flowersSt() >= 10 ? 'Phiếu bé ngoan tuần này! 🎖️' : `còn ${10 - flowersSt()} bông nữa là được phiếu bé ngoan`}</p><p style="font-size:13px;opacity:.7;text-align:center">Kiếm hoa: ngồi học, giơ tay, hát đồng dao, tưới cây, trực nhật, ăn hết cơm</p>`); });
-icons('💌', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} rủ bạn về lại lớp mẫu giáo ngày xưa · đánh trống trường, hát Nu na nu nống!`, place: 'maugiao' }));
-icons('🎁', () => ui.modal(`<h2>Ủng hộ Bè Gỗ</h2><p style="text-align:center">Thích lớp học này? Mời cô nuôi một ly trà đá 🧋</p><div style="width:170px;height:170px;margin:12px auto;border:2px dashed #c0392b;display:flex;align-items:center;justify-content:center;text-align:center;color:#c0392b">[Mã QR SePay<br>đặt sau]</div><p style="text-align:center;font-size:12px;opacity:.7">Hoàn toàn tự nguyện</p>`));
-icons('🔊', b => { if (S.musicOn) { S.stopMusic(); b.textContent = '🔇'; } else { startMusic(); b.textContent = '🔊'; } });
+const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
+icons('🗺️', 'Sơ đồ', () => mapView(W, ui, [{ label: 'Cổng trường', desc: 'Nơi mẹ đưa bé tới', icon: '🏫', pos: [-1.6, 10.5], yaw: Math.PI }, { label: 'Lớp học', desc: 'Bảng đen, bàn ghế, cô Hiền', icon: '📚', pos: [0, -16.6], yaw: Math.PI }, { label: 'Gốc phượng', desc: 'Ghế đá dưới tán hoa đỏ', icon: '🌳', pos: [PHUONG.x + 2.4, PHUONG.z + 2], yaw: -2.3 }, { label: 'Sân chơi', desc: 'Xích đu, cầu trượt', icon: '🛝', pos: [SWING.x + 1, SWING.z + 3], yaw: Math.PI }, { label: 'Trống trường', desc: 'Đánh trống chuyển giờ', icon: '🥁', pos: [DRUM.x, DRUM.z + 2], yaw: Math.PI }, { label: 'Vườn hoa & bàn ăn', desc: 'Tưới cây, ăn trưa', icon: '🌼', pos: [BED.x + 3.5, BED.z + 2], yaw: Math.PI }], 'Sơ đồ trường'));
+icons('🌸', 'Hoa bé ngoan', () => { drawChart(); ui.modal(`<h2>Bông hoa bé ngoan</h2><p style="text-align:center;font-size:40px;margin:6px">${'🌸'.repeat(Math.min(10, flowersSt())) || '·'}</p><p style="text-align:center">Bé có <b>${flowersSt()}</b> bông · ${flowersSt() >= 10 ? 'Phiếu bé ngoan tuần này! 🎖️' : `còn ${10 - flowersSt()} bông nữa là được phiếu bé ngoan`}</p><p style="font-size:13px;opacity:.7;text-align:center">Kiếm hoa: ngồi học, giơ tay, hát đồng dao, tưới cây, trực nhật, ăn hết cơm</p>`); });
+icons('💌', 'Mời bạn', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} rủ bạn về lại lớp mẫu giáo ngày xưa · đánh trống trường, hát Nu na nu nống!`, place: 'maugiao' }));
+icons('🎁', 'Ủng hộ', () => ui.modal(`<h2>Ủng hộ Bè Gỗ</h2><p style="text-align:center">Thích lớp học này? Mời cô nuôi một ly trà đá 🧋</p>${qrPlaceholder('Mã QR SePay sẽ được cập nhật tại đây trong thời gian tới')}<p style="text-align:center;font-size:14px;opacity:.75">Hoàn toàn tự nguyện</p>${begoButton()}`));
+icons('🔊', 'Âm thanh', b => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.stopMusic(); S.music({ scale: [0, 2, 4, 7, 9], root: 392, beat: 0.42, inst: 'pluck', rest: 0.25 }); }
 
 const online = () => { const e = document.getElementById('online'); if (e) e.textContent = `${90 + (Math.random() * 30 | 0)} bạn cùng lớp online`; }; online(); setInterval(online, 9000);
@@ -177,4 +177,5 @@ refGreeting(ui, r => `${r} rủ bạn về lớp mẫu giáo ngày xưa 🎒`);
 await avatarCreator(W, ui, { key: 'kg_av_mg', title: 'Chuẩn bị đi học nào!', outfits: [{ id: 'dongphuc', label: 'Áo trắng quần xanh', ap: { top: '#ffffff', bottom: '#2c4a8a', style: 'ao' } }, { id: 'yem', label: 'Áo yếm đỏ', ap: { top: '#c0392b', bottom: '#f6f1e6', style: 'yem' } }, { id: 'hong', label: 'Váy hồng', ap: { top: '#ffb3c6', bottom: '#ffb3c6', style: 'aodai' } }, { id: 'kesoc', label: 'Áo kẻ sọc', ap: { top: '#7fb3e0', bottom: '#5a4632', style: 'ao' } }, { id: 'cogiao', label: 'Áo dài cô giáo', ap: { top: '#e75f7b', bottom: '#f6f1e6', style: 'aodai' } }],
   hats: { none: 'Không', tai_beo: 'Mũ tai bèo', no: 'Nơ cài tóc' }, hairs: { troc: 'Đầu trọc', ngan: 'Tóc ngắn', choi: 'Hai búi', dai: 'Tóc dài' }, pets: { none: 'Không', cat: 'Mèo mướp', chick: 'Gà con' }, defaults: { scale: 0.85 } });
 if (!amb) W.onFirstInput(); drawChart(); setPhase(0);
+W.restorePos(); ui.tutorial('move', MOVE_TUT);
 window.__W = W;

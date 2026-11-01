@@ -1,4 +1,4 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT } from '../shared/engine.js';
 
 // ---------- terrain ----------
 const riverX = z => 6 * Math.sin(z * 0.035) + 2 * Math.sin(z * 0.11);
@@ -13,7 +13,7 @@ function ground(x, z) {
 }
 const karstCols = [];
 const walkable = (x, z) => ground(x, z) > -0.02 && Math.abs(x) < 26 && z < 74 && z > -103 && !karstCols.some(k => Math.hypot(x - k[0], z - k[1]) < k[2]);
-const W = createWorld({ fog: ['#c9d6cf', 25, 150], sky: ['#9fc3d6', '#e9eadf', '#fff4dc'], hemi: ['#f4f1e4', '#5d7a52', 1.2], sun: ['#fff1d6', 2.4], sunDir: [-25, 35, 15], spawn: [12, 0, 62], spawnYaw: Math.PI, heightAt: (x, z) => Math.max(0, ground(x, z)), walkable, meColor: '#ffd36b' });
+const W = createWorld({ fog: ['#c9d6cf', 25, 150], sky: ['#9fc3d6', '#e9eadf', '#fff4dc'], hemi: ['#f4f1e4', '#5d7a52', 1.2], sun: ['#fff1d6', 2.4], sunDir: [-25, 35, 15], spawn: [12, 0, 62], spawnYaw: Math.PI, saveKey: 'huong', heightAt: (x, z) => Math.max(0, ground(x, z)), walkable, meColor: '#ffd36b' });
 const S = W.sound = new Sound();
 const ui = W.ui = makeUI({ title: 'Đò về Hương Sơn', sub: 'Trẩy hội non nước · <span id="online">…</span>', accent: '#9c3420', panel: '#fbf5e8d9', panelSolid: '#fbf5e8', glow: '#f2c46a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
 const ST = stats(ui, 'huong');
@@ -91,24 +91,51 @@ function roof(w, d, y, h = 1.3) { const g = new THREE.Group(); const sh = new TH
   [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const c = mesh(new THREE.ConeGeometry(0.13, 0.8, 6), '#6b4a36'); c.position.set(a * (w / 2 + 0.5), 0.25, b * (d / 2 + 0.55)); c.rotation.set(b * 0.6, 0, -a * 0.9); g.add(c); });
   const pearl = mesh(new THREE.SphereGeometry(0.22, 12, 10), '#e7b53c', { emissive: '#6a4a08', emissiveIntensity: 0.4, metalness: 0.6, roughness: 0.3 }); pearl.position.y = h * 0.95; g.add(pearl);
   g.position.y = y; return g; }
-const HALL = new THREE.Group(); HALL.position.set(PAG.x, 0, -93.5); W.scene.add(HALL);
+function makeBuddha(gold) { // seated Buddha in meditation (thiền định), lotus throne
+  const g = new THREE.Group(), robe = gold, skin = gold;
+  for (let r = 0; r < 2; r++) for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2 + r * 0.22; const p = mesh(new THREE.SphereGeometry(0.26, 10, 8), r ? '#d9b062' : '#b98a3c', { roughness: 0.5, metalness: 0.3 }); p.scale.set(0.55, 0.38 + r * 0.1, 1); p.position.set(Math.sin(a) * (0.82 - r * 0.12), 0.05 + r * 0.14, Math.cos(a) * (0.62 - r * 0.1)); p.rotation.y = a; g.add(p); }
+  const seat = mesh(new THREE.CylinderGeometry(0.78, 0.7, 0.18, 24), '#c99a48', { metalness: 0.3 }); seat.position.y = 0.2; seat.scale.z = 0.8; g.add(seat);
+  const lap = mesh(new THREE.CapsuleGeometry(0.27, 0.78, 6, 16), robe); lap.rotation.z = Math.PI / 2; lap.scale.set(1, 1, 0.95); lap.position.set(0, 0.45, 0.12); g.add(lap);
+  [-1, 1].forEach(s => { const f = mesh(new THREE.SphereGeometry(0.11, 10, 8), skin); f.scale.set(1.2, 0.6, 0.8); f.position.set(s * 0.22, 0.6, 0.3); g.add(f); });
+  const pts = [[0.0, 0], [0.42, 0], [0.47, 0.25], [0.43, 0.6], [0.36, 0.85], [0.2, 1.0], [0.11, 1.06], [0, 1.08]].map(([x, y]) => new THREE.Vector2(x, y));
+  const torso = mesh(new THREE.LatheGeometry(pts, 28), robe); torso.scale.z = 0.72; torso.position.y = 0.5; g.add(torso);
+  const sash = mesh(new THREE.TorusGeometry(0.4, 0.04, 6, 30, Math.PI * 0.9), robe); sash.rotation.set(0.2, 0, -0.9); sash.position.set(0.05, 1.05, 0.12); sash.scale.z = 0.7; g.add(sash);
+  [-1, 1].forEach(s => { const up = mesh(new THREE.CapsuleGeometry(0.1, 0.36, 4, 10), robe); up.position.set(s * 0.43, 1.12, 0.02); up.rotation.z = s * 0.18; g.add(up);
+    const fo = mesh(new THREE.CapsuleGeometry(0.085, 0.32, 4, 10), robe); fo.position.set(s * 0.26, 0.78, 0.22); fo.rotation.set(1.25, 0, s * 1.05); g.add(fo); });
+  const hands = mesh(new THREE.SphereGeometry(0.15, 12, 8), skin); hands.scale.set(1.4, 0.45, 0.9); hands.position.set(0, 0.7, 0.32); g.add(hands);
+  const neck = mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.14, 12), skin); neck.position.y = 1.6; g.add(neck);
+  const head = new THREE.Group(); head.position.y = 1.86; g.add(head);
+  const face = mesh(new THREE.SphereGeometry(0.24, 24, 18), skin); face.scale.set(0.92, 1.12, 0.95); head.add(face);
+  for (let i = 0; i < 40; i++) { const t = Math.acos(1 - (i + 0.5) / 40 * 0.85), ph = i * 2.4; if (Math.cos(ph) * Math.sin(t) > 0.55 && t > 0.7) continue; const c = mesh(new THREE.SphereGeometry(0.045, 6, 5), '#3a2a18', { roughness: 0.8 }); c.position.set(Math.sin(t) * Math.sin(ph) * 0.235, Math.cos(t) * 0.26 + 0.03, Math.sin(t) * Math.cos(ph) * 0.235); head.add(c); }
+  const ush = mesh(new THREE.SphereGeometry(0.12, 12, 10), '#3a2a18', { roughness: 0.8 }); ush.position.y = 0.3; head.add(ush);
+  const jewel = mesh(new THREE.SphereGeometry(0.035, 8, 6), '#f3d27a', { metalness: 0.7 }); jewel.position.y = 0.42; head.add(jewel);
+  [-1, 1].forEach(s => { const ear = mesh(new THREE.CapsuleGeometry(0.035, 0.2, 3, 6), skin); ear.position.set(s * 0.225, -0.04, 0); head.add(ear);
+    const lid = mesh(new THREE.TorusGeometry(0.035, 0.009, 4, 10, Math.PI), '#4a3015'); lid.rotation.z = Math.PI; lid.position.set(s * 0.08, 0.0, 0.225); head.add(lid); });
+  const urna = mesh(new THREE.SphereGeometry(0.014, 6, 4), '#f3e1a8'); urna.position.set(0, 0.07, 0.235); head.add(urna);
+  const lips = mesh(new THREE.TorusGeometry(0.035, 0.008, 4, 10, Math.PI), '#7a4a1a'); lips.rotation.z = Math.PI; lips.position.set(0, -0.11, 0.222); head.add(lips);
+  g.scale.setScalar(1.2); g.traverse(o => { if (o.isMesh) o.castShadow = true; }); return g; }
+const HALL_ROOF = [], HALL_PILLARS = []; const HALL = new THREE.Group(); HALL.position.set(PAG.x, 0, -93.5); W.scene.add(HALL);
 { const base = mesh(new THREE.BoxGeometry(14, 0.95, 11), '#9c9686'); base.position.y = 0.47; HALL.add(base);
   for (let i = 0; i < 4; i++) { const st = mesh(new THREE.BoxGeometry(5, 0.24, 0.6), '#a8a292'); st.position.set(0, 0.12 + i * 0.24, 5.5 + (3 - i) * 0.6 - 0.3); HALL.add(st); }
   const walls = mesh(new THREE.BoxGeometry(11, 3.4, 0.3), WALL); walls.position.set(0, 2.65, -4); HALL.add(walls); [-1, 1].forEach(s => { const sw = mesh(new THREE.BoxGeometry(0.3, 3.4, 8), WALL); sw.position.set(s * 5.5, 2.65, 0); HALL.add(sw); });
-  for (let i = 0; i < 6; i++) { const c = mesh(new THREE.CylinderGeometry(0.2, 0.22, 3.4, 10), RED); c.position.set(-5 + i * 2, 2.65, 4); HALL.add(c); }
-  HALL.add(roof(13, 10, 4.35, 1.6)); const r2 = roof(8, 6, 6.1, 1.3); HALL.add(r2); const mid = mesh(new THREE.BoxGeometry(7, 0.9, 5), WALL); mid.position.y = 5.9; HALL.add(mid);
+  for (let i = 0; i < 6; i++) { const c = mesh(new THREE.CylinderGeometry(0.2, 0.22, 3.4, 10), mat(RED, { transparent: true })); c.position.set(-5 + i * 2, 2.65, 4); HALL.add(c); HALL_PILLARS.push(c); }
+  const r1 = roof(13, 10, 4.35, 1.6); HALL.add(r1); const r2 = roof(8, 6, 6.1, 1.3); HALL.add(r2); const mid = mesh(new THREE.BoxGeometry(7, 0.9, 5), WALL); mid.position.y = 5.9; HALL.add(mid);
+  HALL_ROOF.push(r1, r2, mid); W.addOccluder(walls, ...HALL.children.filter(o => o.isMesh && o.geometry.type === 'BoxGeometry' && o.geometry.parameters.depth === 8));
   // altar & seated statue (simple, respectful)
   const alt = mesh(new THREE.BoxGeometry(4, 1.1, 1.4), '#7a2a1c'); alt.position.set(0, 1.5, -2.8); HALL.add(alt);
-  const gold = mat('#d8a840', { metalness: 0.7, roughness: 0.35, emissive: '#3a2604', emissiveIntensity: 0.4 });
-  const lotus = mesh(new THREE.CylinderGeometry(0.75, 0.5, 0.35, 16), '#c9a050'); lotus.position.set(0, 2.25, -3.1); HALL.add(lotus);
-  const body = mesh(new THREE.SphereGeometry(0.62, 18, 14), gold); body.scale.set(1.05, 1, 0.8); body.position.set(0, 2.85, -3.1); HALL.add(body);
-  const head = mesh(new THREE.SphereGeometry(0.3, 18, 14), gold); head.position.set(0, 3.7, -3.1); HALL.add(head);
-  const halo = mesh(new THREE.TorusGeometry(0.62, 0.05, 8, 40), mat('#ffd970', { emissive: '#ffb42e', emissiveIntensity: 1.2 })); halo.position.set(0, 3.7, -3.4); HALL.add(halo);
+  const gold = mat('#c9973a', { metalness: 0.55, roughness: 0.42, emissive: '#2a1a03', emissiveIntensity: 0.25 });
+  const statue = makeBuddha(gold); statue.position.set(0, 2.05, -3.15); HALL.add(statue);
+  const mandorla = mesh(new THREE.CircleGeometry(1.15, 40), mat('#8a5a22', { metalness: 0.4, roughness: 0.6 })); mandorla.position.set(0, 3.55, -3.62); HALL.add(mandorla);
+  const ring = mesh(new THREE.TorusGeometry(1.15, 0.05, 8, 48), gold); ring.position.copy(mandorla.position); HALL.add(ring);
   const lampL = new THREE.PointLight('#ffb35c', 6, 9, 1.6); lampL.position.set(0, 3, -1.2); HALL.add(lampL);
   [-1.5, 1.5].forEach(x => { const cnd = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.4, 8), '#f4ead2'); cnd.position.set(x, 2.25, -2.5); HALL.add(cnd); const fl = mesh(new THREE.SphereGeometry(0.06, 8, 6), mat('#ffcf6a', { emissive: '#ffa21f', emissiveIntensity: 2 })); fl.position.set(x, 2.5, -2.5); fl.scale.y = 1.6; HALL.add(fl); });
   W.addBox(PAG.x, -93.5 - 4, 5.6, 0.3); W.addBox(PAG.x - 5.5, -93.5, 0.3, 4); W.addBox(PAG.x + 5.5, -93.5, 0.3, 4); W.addBox(PAG.x, -96.3, 2, 0.8);
   for (let i = 0; i < 6; i++) W.addCollider(PAG.x - 5 + i * 2, -89.5, 0.25);
 }
+// Chánh điện: lift roof away & pull camera back so the statue is always in view
+{ let inHall = false, saved = null; W.onUpdate(() => { const P = W.player, q = Math.abs(P.pos.x - PAG.x) < 5.6 && P.pos.z < -89 && P.pos.z > -98;
+  if (q !== inHall) { inHall = q; HALL_ROOF.forEach(r => r.visible = !q); HALL_PILLARS.forEach(c => c.material.opacity = q ? 0.18 : 1); if (q) { saved = [P.camDist, P.camPitch]; P.camDist = 7.5; P.camPitch = 0.42; } else if (saved) { [P.camDist, P.camPitch] = saved; } } });
+  W.camLimit = (c, t) => { if (Math.abs(W.player.pos.x - PAG.x) < 5.6 && W.player.pos.z < -89 && W.player.pos.z > -98) { c.x = THREE.MathUtils.clamp(c.x, PAG.x - 5, PAG.x + 5); c.z = Math.max(c.z, t.z + 2.5); } }; }
 // cushions (bồ đoàn)
 const cushions = []; for (let i = 0; i < 6; i++) { const x = PAG.x - 2.5 + (i % 3) * 2.5, z = -94 + Math.floor(i / 3) * 1.6; const c = mesh(new THREE.CylinderGeometry(0.38, 0.42, 0.18, 16), i % 2 ? '#c9822a' : '#b8662a'); c.position.set(x, 1.04, z); W.scene.add(c); cushions.push({ x, z }); }
 // incense urn (lư hương) and bell tower (gác chuông)
@@ -166,7 +193,13 @@ function boardBoat(toPagoda = true) { const P = W.player; myBoat = spawnBoat(toP
 
 // ---------- interactions ----------
 const LOC = [['Bình an', 'Thuận buồm xuôi gió, gia đạo an khang.'], ['Tài lộc', 'Lộc đến cửa nhà, làm ăn phát đạt.'], ['Sức khoẻ', 'Thân tâm an lạc, khoẻ như núi Hương.'], ['Nhân duyên', 'Duyên lành tự đến, thương ai được nấy.'], ['Học hành', 'Chữ tâm sáng suốt, thi đâu đỗ đó.'], ['Hiếu thảo', 'Cha mẹ mạnh khoẻ, con cháu sum vầy.'], ['Thảnh thơi', 'Buông bớt lo âu, lòng nhẹ như mây.'], ['Hanh thông', 'Việc khó hoá dễ, đường xa hoá gần.']];
-W.addInteract({ pos: { x: DOCK1.x + 1.2, z: DOCK1.z }, r: 3, label: '🛶 Lên đò đi chùa', use: () => boardBoat(true) });
+W.addInteract({ pos: { x: DOCK1.x + 1.2, z: DOCK1.z }, r: 3.5, label: '🛶 Lên đò đi chùa', use: () => boardBoat(true) });
+// big, obvious "LÊN ĐÒ" guide: bouncing arrow over the jetty + chevrons on the ground from spawn
+const guide = new THREE.Group(); W.scene.add(guide);
+{ const arrowM = mat('#ffcc33', { emissive: '#e08a00', emissiveIntensity: 0.6 }); const arr = new THREE.Group(); const cone = mesh(new THREE.ConeGeometry(0.45, 0.8, 4), arrowM); cone.rotation.x = Math.PI; arr.add(cone); const sh = mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.7, 8), arrowM); sh.position.y = 0.7; arr.add(sh);
+  arr.position.set(DOCK1.x + 0.8, 3.2, DOCK1.z); guide.add(arr); const lb = label('LÊN ĐÒ', '#ffe27a', 0.6); lb.position.set(DOCK1.x + 0.8, 4.8, DOCK1.z); guide.add(lb);
+  for (let i = 1; i <= 3; i++) { const c = mesh(new THREE.ConeGeometry(0.35, 0.7, 3), arrowM); c.rotation.set(-Math.PI / 2, 0, 0); const k = i / 4, x = 12 + (DOCK1.x + 1.5 - 12) * k, z = 62 + (DOCK1.z - 62) * k; c.position.set(x, 0.08, z); c.rotation.z = Math.atan2(DOCK1.x - 12, -(DOCK1.z - 62)); guide.add(c); }
+  W.onUpdate((dt, t) => { arr.position.y = 3.1 + Math.sin(t * 3) * 0.3; arr.rotation.y = t; guide.visible = !W.player.riding && W.player.pos.z > 30; }); }
 W.addInteract({ pos: { x: DOCK2.x + 1.2, z: DOCK2.z }, r: 3, label: '🛶 Lên đò về Bến Đục', use: () => boardBoat(false) });
 W.addInteract({ pos: URN, r: 2.6, label: '🪔 Thắp hương', use: () => { lightIncense(URN.x, URN.z, 1.9); bow(W.player.av); S.tone(196, 3, 0.08); ui.toast('Nén hương thơm gửi lời nguyện cầu 🙏'); ui.feed(`${W.player.name} vừa thắp hương`); ST.add('huong'); } });
 W.addInteract({ pos: BELL, r: 2.8, label: '🔔 Thỉnh chuông', use: () => { S.bell(98, 0.4); let k = 0; const sw = () => { bellMesh.rotation.z = Math.sin(k) * 0.15 * Math.exp(-k * 0.15); k += 0.3; if (k < 20) requestAnimationFrame(sw); }; sw(); ui.toast('Boong… tiếng chuông vọng khắp non'); ST.add('chuong'); } });
@@ -176,21 +209,23 @@ cushions.forEach((c, i) => W.addInteract({ pos: { x: c.x, z: c.z }, r: 0.9, labe
 W.addInteract({ pos: { x: CAVE.x + 0.5, z: CAVE.z + 2 }, r: 3, label: '🕯️ Thắp nến trong động', use: () => { lightIncense(CAVE.x, CAVE.z + 0.6, 0.9); S.bell(146, 0.15); ui.toast('Ánh nến lung linh trong động Hương Tích'); } });
 // chores: sweep courtyard leaves (công quả)
 const BROOM = { x: PAG.x + 5, z: -75 }; const broomRack = broom(); broomRack.position.set(BROOM.x, 1.2, BROOM.z); broomRack.rotation.set(0, 0, 0.2); W.scene.add(broomRack);
-const leaves = leafPatch(W, { center: [PAG.x, -78], radius: 7, count: 70, colors: ['#c9a04a', '#b5803a', '#e0b860', '#9a6b2a'], onDone: () => { stopSweep(); ui.toast('Sân chùa sạch bong · công quả viên mãn 🙏'); S.chime(); ST.add('quet'); setTimeout(() => leaves.reset(), 30000); } });
+const leaves = leafPatch(W, { center: [PAG.x, -78], radius: 7, count: 70, colors: ['#c9a04a', '#b5803a', '#e0b860', '#9a6b2a'], onDone: () => { stopSweep(); doneCard(ui, { icon: '🧹', title: 'Công quả viên mãn', msg: 'Sân chùa sạch bong. Cảm ơn bạn đã góp sức 🙏' }); S.chime(); ST.add('quet'); setTimeout(() => leaves.reset(), 30000); } });
 let held = null; function stopSweep() { leaves.active = false; W.player.av.sweeping = false; if (held) { held.parent?.remove(held); held = null; } sweepI.label = '🧹 Quét sân chùa'; broomRack.visible = true; }
 const sweepI = W.addInteract({ pos: BROOM, r: 2.2, label: '🧹 Quét sân chùa', use: () => { if (leaves.active) return stopSweep(); leaves.active = true; W.player.av.sweeping = true; held = broom(); W.player.av.hand.add(held); broomRack.visible = false; sweepI.label = '✋ Cất chổi'; ui.toast(`Đi quanh sân để quét ${leaves.left} chiếc lá`); } });
 
 // ---------- action bar ----------
 const KINH = ['Quán Tự Tại Bồ Tát hành thâm Bát Nhã Ba La Mật Đa thời,', 'chiếu kiến ngũ uẩn giai không, độ nhất thiết khổ ách.', 'Xá Lợi Tử, sắc bất dị không, không bất dị sắc,', 'sắc tức thị không, không tức thị sắc,', 'thọ tưởng hành thức diệc phục như thị.', 'Xá Lợi Tử, thị chư pháp không tướng,', 'bất sanh bất diệt, bất cấu bất tịnh, bất tăng bất giảm.', '…', 'Yết đế, yết đế, ba la yết đế, ba la tăng yết đế, bồ đề tát bà ha.'];
+const doBtn = ui.button('kg-acts', '🛶 Lên đò', () => { const P = W.player; if (P.riding) return; if (P.pos.z > 0) { if (Math.hypot(P.pos.x - DOCK1.x, P.pos.z - DOCK1.z) > 3.5) W.teleport(DOCK1.x + 1.2, DOCK1.z, Math.PI); boardBoat(true); } else { if (Math.hypot(P.pos.x - DOCK2.x, P.pos.z - DOCK2.z) > 3.5) W.teleport(DOCK2.x + 1.5, DOCK2.z, 0); boardBoat(false); } });
+doBtn.style.fontSize = '18px'; W.onUpdate(() => { const t = W.player.riding ? '' : (W.player.pos.z > 0 ? '🛶 Lên đò đi chùa' : '🛶 Đò về Bến Đục'); doBtn.style.display = t ? '' : 'none'; if (t && doBtn.textContent !== t) doBtn.textContent = t; });
 ui.button('kg-acts', '🙏 Lạy', () => { bow(W.player.av); S.mo(); ST.add('lay'); });
-ui.button('kg-acts', '📿 Tràng hạt', () => beadsView(ui, { mantra: 'Nam mô A Di Đà Phật', sound: S, onRound: () => ui.toast('Tròn một chuỗi 108 hạt 🙏') }));
-ui.button('kg-acts', '📜 Tụng kinh', () => { reader(ui, { title: 'Bát Nhã Tâm Kinh', sub: 'Bản Hán Việt (lược) · mỗi câu một tiếng mõ', lines: KINH, beat: 2.6, onLine: () => { S.mo(); if (W.player.av) W.player.av.pray = true; }, onEnd: () => { S.bell(110, 0.3); W.player.av.pray = false; } }); });
-const icons = (t, f) => ui.button('kg-icons', t, f);
-icons('🗺️', () => mapView(W, ui, [{ label: 'Bến Đục', desc: 'Nơi xuống đò bắt đầu trẩy hội', icon: '🛶', pos: [DOCK1.x + 2, DOCK1.z], yaw: Math.PI }, { label: 'Bến Trò', desc: 'Bờ suối thả hoa đăng', icon: '🪷', pos: [DOCK2.x + 2, DOCK2.z + 1], yaw: Math.PI }, { label: 'Sân chùa', desc: 'Lư hương, gác chuông, cây lộc', icon: '🛕', pos: [PAG.x, -76], yaw: Math.PI }, { label: 'Chánh điện', desc: 'Ngồi bồ đoàn, lạy Phật, tụng kinh', icon: '🧘', pos: [PAG.x, -91.5], yaw: Math.PI }, { label: 'Động Hương Tích', desc: 'Hang đá thắp nến', icon: '⛰️', pos: [CAVE.x + 1, CAVE.z + 3.5], yaw: Math.PI }], 'Bản đồ Hương Sơn'));
-icons('📊', () => { const s = ST.s; ui.modal(`<h2>Hành hương của bạn</h2><div style="font-size:15px;line-height:2">🛶 Đi đò: <b>${s.do || 0}</b><br>🪔 Thắp hương: <b>${s.huong || 0}</b><br>🔔 Thỉnh chuông: <b>${s.chuong || 0}</b><br>🧧 Xin lộc: <b>${s.loc || 0}</b><br>🪷 Hoa đăng: <b>${s.hoadang || 0}</b><br>🧹 Quét sân: <b>${s.quet || 0}</b><br>🙏 Lạy: <b>${s.lay || 0}</b></div>`); });
-icons('💌', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} rủ bạn đi đò trẩy hội Hương Sơn online, cùng thắp hương và thả hoa đăng!`, place: 'huong' }));
-icons('🙏', () => ui.modal(`<h2>Công đức tùy tâm</h2><p style="text-align:center">Mỗi đồng công đức giúp giữ con đò này trôi mãi.</p><div style="width:170px;height:170px;margin:12px auto;border:2px dashed #9c3420;display:flex;align-items:center;justify-content:center;text-align:center;color:#9c3420">[Mã QR SePay<br>đặt sau]</div><p style="text-align:center;font-size:12px;opacity:.7">Hoàn toàn tự nguyện · không kèm vật phẩm</p>`));
-icons('🔊', (b) => { if (S.musicOn) { S.stopMusic(); b.textContent = '🔇'; } else { startMusic(); b.textContent = '🔊'; } });
+ui.button('kg-acts', '📿 Tràng hạt', () => beadsView(ui, { mantra: 'Nam mô A Di Đà Phật', sound: S, onRound: () => doneCard(ui, { icon: '📿', title: 'Tròn một chuỗi 108 hạt', msg: 'Nam mô A Di Đà Phật. Tâm an, đường đi nhẹ.' }) }));
+ui.button('kg-acts', '📜 Tụng kinh', () => { reader(ui, { title: 'Bát Nhã Tâm Kinh', sub: 'Bản Hán Việt (lược) · mỗi câu một tiếng mõ', lines: KINH, beat: 2.6, onLine: () => { S.mo(); if (W.player.av) W.player.av.pray = true; }, onEnd: () => { S.bell(110, 0.3); W.player.av.pray = false; setTimeout(() => doneCard(ui, { icon: '📜', title: 'Viên mãn thời kinh', msg: 'Hồi hướng công đức cho muôn loài.' }), 400); } }); });
+const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
+icons('🗺️', 'Bản đồ', () => mapView(W, ui, [{ label: 'Bến Đục', desc: 'Nơi xuống đò bắt đầu trẩy hội', icon: '🛶', pos: [DOCK1.x + 2, DOCK1.z], yaw: Math.PI }, { label: 'Bến Trò', desc: 'Bờ suối thả hoa đăng', icon: '🪷', pos: [DOCK2.x + 2, DOCK2.z + 1], yaw: Math.PI }, { label: 'Sân chùa', desc: 'Lư hương, gác chuông, cây lộc', icon: '🛕', pos: [PAG.x, -76], yaw: Math.PI }, { label: 'Chánh điện', desc: 'Ngồi bồ đoàn, lạy Phật, tụng kinh', icon: '🧘', pos: [PAG.x, -91.5], yaw: Math.PI }, { label: 'Động Hương Tích', desc: 'Hang đá thắp nến', icon: '⛰️', pos: [CAVE.x + 1, CAVE.z + 3.5], yaw: Math.PI }], 'Bản đồ Hương Sơn'));
+icons('📊', 'Hành trình', () => { const s = ST.s; ui.modal(`<h2>Hành hương của bạn</h2><div style="font-size:15px;line-height:2">🛶 Đi đò: <b>${s.do || 0}</b><br>🪔 Thắp hương: <b>${s.huong || 0}</b><br>🔔 Thỉnh chuông: <b>${s.chuong || 0}</b><br>🧧 Xin lộc: <b>${s.loc || 0}</b><br>🪷 Hoa đăng: <b>${s.hoadang || 0}</b><br>🧹 Quét sân: <b>${s.quet || 0}</b><br>🙏 Lạy: <b>${s.lay || 0}</b></div>`); });
+icons('💌', 'Mời bạn', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} rủ bạn đi đò trẩy hội Hương Sơn online, cùng thắp hương và thả hoa đăng!`, place: 'huong' }));
+icons('🙏', 'Công đức', () => ui.modal(`<h2>Công đức tùy tâm</h2><p style="text-align:center">Mỗi đồng công đức giúp giữ con đò này trôi mãi.</p>${qrPlaceholder('Mã QR SePay sẽ được cập nhật tại đây trong thời gian tới')}<p style="text-align:center;font-size:14px;opacity:.75">Hoàn toàn tự nguyện · không kèm vật phẩm</p>${begoButton()}`));
+icons('🔊', 'Âm thanh', (b) => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.music({ scale: [0, 2, 5, 7, 9], root: 293.66, beat: 0.7, inst: 'flute', gong: 24, rest: 0.4 }); }
 
 // simulated shared presence
@@ -205,5 +240,6 @@ refGreeting(ui, r => `${r} mời bạn cùng trẩy hội Hương Sơn 🙏`);
 await avatarCreator(W, ui, { key: 'kg_av_huong', title: 'Sửa soạn đi trẩy hội', namePH: 'Tên / pháp danh', outfits: [{ id: 'trang', label: 'Áo tràng lam', ap: { top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' } }, { id: 'nau', label: 'Áo nâu sồng', ap: { top: '#8a6a4a', bottom: '#6a523a', style: 'aodai' } }, { id: 'aodai_do', label: 'Áo dài đỏ', ap: { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' } }, { id: 'aodai_trang', label: 'Áo dài trắng', ap: { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' } }, { id: 'baba', label: 'Áo bà ba', ap: { top: '#d9c38a', bottom: '#2f2f2f', style: 'ao' } }, { id: 'tuthan', label: 'Áo tứ thân', ap: { top: '#8b4a2b', bottom: '#d0402a', style: 'yem' } }],
   hats: { none: 'Không', nonla: 'Nón lá', khan: 'Khăn vấn' }, pets: { none: 'Không', dog: 'Chó vàng', cat: 'Mèo mướp', buffalo: 'Nghé con' } });
 if (!ambient) W.onFirstInput();
+W.restorePos(); ui.tutorial('move', MOVE_TUT);
 ui.toast('Đến Bến Đục rồi! Lại gần bến và bấm “Lên đò” để đi chùa', 4500);
 window.__W = W;
