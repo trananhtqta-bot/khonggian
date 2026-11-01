@@ -22,15 +22,16 @@ function mark(page, id) { const s = load(), t = today(); const d = s.days[t] = s
   save(s); return { s, fresh: true, newDay }; }
 export function doneToday(page, s = load()) { return ((s.days[today()] || {})[page]) || []; }
 
+export function allDoneCard() { const d = document.createElement('div'); d.className = 'kg-alldone'; d.innerHTML = 'Hôm nay bạn đã trọn một ngày an lành 🌱<br>Cây thị đã được chăm'; d.style.cssText = 'position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);width:min(84vw,360px);background:#fffaf0f2;color:#2f3a22;font-size:20px;line-height:1.5;font-weight:bold;text-align:center;padding:22px 18px;border-radius:18px;box-shadow:0 10px 40px #0006;z-index:60;pointer-events:none;transition:opacity .5s'; document.body.appendChild(d); setTimeout(() => { d.style.opacity = '0'; setTimeout(() => d.remove(), 600); }, 4000); }
 export function dailyTasks({ ui, ST, page, tasks, icons, solemn = false, chime }) {
   const add0 = ST.add.bind(ST);
   let btn;
   const n = () => doneToday(page).filter(id => tasks.some(t => t.id === id)).length;
-  const label = () => `<span>📋</span><small>Hôm nay ${n()}/${tasks.length}</small>`;
+  const label = () => solemn ? `<span>📋</span><small>Việc tri ân</small>` : `<span>📋</span><small>Hôm nay ${n()}/${tasks.length}</small>`;
   const refresh = () => { if (btn) btn.innerHTML = label(); };
   ST.add = (k, v) => { const r = add0(k, v); const t = tasks.find(t => t.keys.includes(k)); if (t) { const m = mark(page, t.id); if (m.fresh) { refresh(); const all = n() === tasks.length;
         const msg = solemn ? (all ? 'Xin cảm ơn bạn đã đến viếng' : (t.doneMsg || 'Xin cảm ơn bạn')) : (all ? 'Hôm nay bạn đã trọn một ngày an lành · cây thị đã được chăm 🌱' : `✔ Đã xong: ${t.text}`);
-        setTimeout(() => ui.toast(msg, 3500), 600); if (!solemn && chime) chime(); } } return r; };
+        setTimeout(() => (all && !solemn) ? allDoneCard() : ui.toast(msg, 3500), 600); if (!solemn && chime) chime(); } } return r; };
   const open = () => { const done = doneToday(page), st = streakNow();
     ui.modal(`<h2>Việc nhỏ hôm nay</h2>${solemn ? '<p style="text-align:center;font-size:16px;margin:4px 0 10px;opacity:.8">Những việc tri ân lặng lẽ, không tính điểm.</p>' : `<p style="text-align:center;font-size:18px;margin:4px 0 10px">${st ? `Bạn đã ghé <b>${st}</b> ngày liền` : 'Làm một việc nhỏ để bắt đầu chuỗi ngày'}</p><p style="text-align:center;font-size:14px;opacity:.7;margin:-4px 0 8px">Mỗi tuần được nghỉ 1 ngày mà chuỗi vẫn giữ.</p>`}
       ${tasks.map((t, i) => { const ok = done.includes(t.id); return `<button class="kg-btn kgd-row" data-i="${i}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:8px 0;font-size:20px;text-align:left;${ok ? 'opacity:.75' : ''}"><span style="font-size:28px;width:36px;text-align:center">${ok ? '✅' : t.icon}</span><span style="flex:1">${t.text}<br><small style="font-size:15px;opacity:.8">${ok ? 'Đã xong hôm nay' : t.hint}</small></span>${ok ? '' : '<span style="font-size:22px">›</span>'}</button>`; }).join('')}

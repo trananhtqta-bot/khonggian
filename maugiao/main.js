@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=12';
-import { dailyTasks } from '../shared/daily.js?v=12';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=13';
+import { dailyTasks, doneToday } from '../shared/daily.js?v=13';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
@@ -127,7 +127,7 @@ function drumRoll() { [0, 0.5, 1.0].forEach(d => setTimeout(() => { S.drum(); dr
 
 // ---------- stickers (bông hoa bé ngoan) ----------
 const flowersSt = () => ST.s.hoa || 0;
-function giveFlower(why) { ST.add('hoa'); drawChart(); S.chime(); doneCard(ui, { icon: '🌸', title: 'Cô tặng bé 1 bông hoa', msg: `Vì bé ${why}. Bé có ${ST.s.hoa || 0} bông hoa bé ngoan rồi!` }); ui.feed(`${W.player.name} được bông hoa bé ngoan`); }
+function giveFlower(why) { ST.add('hoa'); drawChart(); S.chime(); setTimeout(() => { const fin = ['dongdao','tuoi'].every(x => doneToday('mg').includes(x)); doneCard(ui, { icon: '🌸', title: 'Cô tặng bé 1 bông hoa', msg: `Vì bé ${why}. Bé có ${ST.s.hoa || 0} bông hoa bé ngoan rồi!${fin ? ' Bé đã xong việc hôm nay!' : ''}` }); }, 0); ui.feed(`${W.player.name} được bông hoa bé ngoan`); }
 function drawChart() { const g = chartC.getContext('2d'); g.fillStyle = '#fff8e6'; g.fillRect(0, 0, 512, 512); g.fillStyle = '#c0392b'; g.font = 'bold 44px Georgia'; g.textAlign = 'center'; g.fillText('BÉ NGOAN', 256, 60); g.textAlign = 'left'; g.font = '28px Georgia'; const names = [LIVE ? 'Bé' : (W.player.name || 'Bé'), ...KIDN.slice(0, 5)];
   names.forEach((n, i) => { g.fillStyle = '#333'; g.fillText(n, 20, 120 + i * 66); const k = i === 0 ? Math.min(10, flowersSt()) : (i * 3 + 2) % 7; for (let j = 0; j < k; j++) { g.fillStyle = ['#ff6b8b', '#ff8c42', '#ffd93b'][j % 3]; g.beginPath(); g.arc(180 + j * 32, 110 + i * 66, 12, 0, 7); g.fill(); } }); chartT.needsUpdate = true; }
 

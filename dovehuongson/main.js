@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=12';
-import { dailyTasks } from '../shared/daily.js?v=12';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=13';
+import { dailyTasks } from '../shared/daily.js?v=13';
 
 // ---------- terrain ----------
 const riverX = z => 6 * Math.sin(z * 0.035) + 2 * Math.sin(z * 0.11);
@@ -59,7 +59,7 @@ function makeBoat() { const g = new THREE.Group(); const hull = new THREE.Shape(
   const hg = new THREE.ExtrudeGeometry(hull, { depth: 4.2, bevelEnabled: false }); hg.translate(0, 0.25, -2.1); const hp = hg.attributes.position; for (let i = 0; i < hp.count; i++) { const z = hp.getZ(i), k = 1 - Math.pow(Math.abs(z) / 2.1, 3) * 0.7; hp.setX(i, hp.getX(i) * k); hp.setY(i, hp.getY(i) + Math.pow(Math.abs(z) / 2.1, 2) * 0.25); } hg.computeVertexNormals();
   g.add(mesh(hg, '#6a4426', { roughness: 0.7 })); for (let z of [-1.2, 0, 1.2]) { const b = mesh(new THREE.BoxGeometry(0.9, 0.05, 0.25), '#8a5a33'); b.position.set(0, 0.2, z); g.add(b); } return g; }
 function makeRower(ap) { return makeNPCav({ skin: '#d9a77c', hair: 'bui', top: '#4a3b6b', bottom: '#2b2b33', style: 'ao', hat: 'nonla', ...ap }); }
-import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=12';
+import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=13';
 function makeNPCav(ap) { return makeAvatar(ap); }
 const NAMES = ['Bà Tư', 'Cô Hạnh', 'Anh Tuấn', 'Chị Thảo', 'Bé Na', 'Chú Ba', 'Minh', 'Ngọc', 'Bác Lộc', 'Linh', 'Hùng', 'Cô Năm', 'Phúc', 'Vy', 'Trang', 'Long'];
 const OUTF = [{ top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' }, { top: '#8a6a4a', bottom: '#5a4632', style: 'aodai' }, { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' }, { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' }, { top: '#3e5b4a', bottom: '#2b2b2b', style: 'ao' }, { top: '#d9c38a', bottom: '#3a3a3a', style: 'ao' }];
@@ -189,8 +189,9 @@ W.onUpdate(dt => { if (myPet && !W.player.riding) followPet(myPet, W.player.pos,
 // ---------- riding the đò ----------
 let myBoat = null;
 function boardBoat(toPagoda = true) { const P = W.player; myBoat = spawnBoat(toPagoda ? 54 : -62, toPagoda ? 1 : -1, true); myBoat.off = 0; myBoat.speed = 2.6; W.standUp(); P.av.seated = true; if (myPet) myPet.root.visible = false; ui.toast('Cô lái đò chèo ra suối Yến… thả lỏng và ngắm cảnh nhé'); S.chime(); ST.add('do');
+  const rl = document.createElement('div'); rl.id = 'kg-ride'; rl.textContent = toPagoda ? 'Đang về Bến Trò…' : 'Đang về Bến Đục…'; rl.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));background:#0009;color:#fff;font-size:14px;padding:4px 12px;border-radius:10px;z-index:30;pointer-events:none'; document.body.appendChild(rl);
   P.riding = (dt) => { placeBoat(myBoat, dt, W.time); const bp = myBoat.g.position; const fw = new THREE.Vector3(0, 0, 0.3).applyEuler(myBoat.g.rotation); P.pos.set(bp.x + fw.x, bp.y + 0.2, bp.z + fw.z); P.yaw = myBoat.g.rotation.y; P.speed = 0;
-    if ((toPagoda && myBoat.z < -62) || (!toPagoda && myBoat.z > 54)) { P.riding = null; const d = toPagoda ? DOCK2 : DOCK1; W.teleport(d.x + 1.5, d.z, toPagoda ? Math.PI : 0); W.scene.remove(myBoat.g); boats.splice(boats.indexOf(myBoat), 1); myBoat = null; if (myPet) { myPet.root.visible = true; myPet.root.position.copy(W.player.pos); } ui.toast(toPagoda ? 'Đã tới Bến Trò · đi qua cổng tam quan lên chùa' : 'Đã về Bến Đục'); S.bell(130, 0.25); } }; }
+    if ((toPagoda && myBoat.z < -62) || (!toPagoda && myBoat.z > 54)) { P.riding = null; rl.remove(); const d = toPagoda ? DOCK2 : DOCK1; W.teleport(d.x + 1.5, d.z, toPagoda ? Math.PI : 0); W.scene.remove(myBoat.g); boats.splice(boats.indexOf(myBoat), 1); myBoat = null; if (myPet) { myPet.root.visible = true; myPet.root.position.copy(W.player.pos); } ui.toast(toPagoda ? 'Đã tới Bến Trò · đi qua cổng tam quan lên chùa' : 'Đã về Bến Đục'); S.bell(130, 0.25); } }; }
 
 // ---------- interactions ----------
 const LOC = [['Bình an', 'Mong bạn và gia đình luôn bình an.'], ['Chăm chỉ', 'Siêng năng mỗi ngày, việc nhỏ cũng thành.'], ['Sức khoẻ', 'Ăn ngủ điều độ, giữ thân tâm khoẻ.'], ['Thương người', 'Sống chân thành, quý người quanh ta.'], ['Học hành', 'Chăm học mỗi ngày, hiểu thêm một điều.'], ['Hiếu thảo', 'Cha mẹ mạnh khoẻ, con cháu sum vầy.'], ['Thảnh thơi', 'Buông bớt lo âu, lòng nhẹ như mây.'], ['Kiên nhẫn', 'Việc khó cứ bước từng bước, rồi sẽ qua.']];

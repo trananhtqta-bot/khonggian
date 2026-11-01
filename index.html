@@ -8,7 +8,7 @@ a.p{display:flex;align-items:center;justify-content:space-between;margin:14px au
 <div id="tree" aria-label="Cây thị của bạn"></div><p id="cap"></p><p class="sub" id="sub"></p>
 <a class="p" href="dovehuongson/">Đò về Hương Sơn <small id="c-huong"></small></a><a class="p" href="maugiao/">Lớp Mẫu Giáo Ngày Xưa <small id="c-mg"></small></a><a class="p" href="trianlietsi/">Tri Ân Liệt Sĩ <small id="c-trian"></small></a>
 <script type="module">
-import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=12';
+import { load, streakNow, doneToday, awayDays } from './shared/daily.js?v=13';
 const s = load(), total = s.total, st = streakNow(s), todayDone = ['huong','mg'].some(p => doneToday(p, s).length);
 const N = { huong: 3, mg: 2 }; for (const p in N) document.getElementById('c-' + p).textContent = `Hôm nay ${doneToday(p, s).length}/${N[p]}`; document.getElementById('c-trian').textContent = 'Xin mời ghé viếng';
 // giai đoạn: 0 hạt, 1-2 mầm, 3-6 cây non, 7-13 cây lá, 14-29 ra hoa, 30+ có quả
@@ -45,13 +45,13 @@ const away = total > 0 && !todayDone ? awayDays(s) : 0;
 document.getElementById('sub').textContent = total === 0 ? 'Ghé mỗi ngày, làm một việc nhỏ, cây thị sẽ lớn dần.' : away >= 1 ? 'Cây thị vẫn đợi bạn 🌱 Làm một việc nhỏ là cây vui trở lại.' : (todayDone ? 'Hôm nay cây đã được chăm. Mai ghé lại nhé.' : 'Hôm nay cây chưa được chăm. Làm một việc nhỏ là đủ.') + (next ? ` Còn ${next - total} ngày nữa cây sẽ lớn thêm.` : '');
 </script><div id="uhwrap"></div>
 <script>(()=>{let L=false;try{const q=new URLSearchParams(location.search).get('live');if(q==='1')sessionStorage.setItem('kg_live','1');if(q==='0')sessionStorage.removeItem('kg_live');L=sessionStorage.getItem('kg_live')==='1'}catch(e){}window.KG_LIVE=L;
-if(L){const d=document.createElement('div');d.textContent='Có hình ảnh tạo bởi AI · Trải nghiệm mô phỏng văn hóa, không phải nghi lễ thật';d.style.cssText='position:fixed;right:6px;bottom:6px;max-width:62vw;font-size:10.5px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right';document.body.appendChild(d);return}
-document.getElementById('uhwrap').innerHTML=`<button id="ungho" style="margin:22px auto 0;display:block;padding:12px 22px;border-radius:24px;border:1px solid #f3ead777;background:transparent;color:#f3ead7;font-size:17px;cursor:pointer">☕ Ủng hộ ad</button>
+if(L){const d=document.createElement('div');d.textContent='Game dựng với hỗ trợ AI · Trải nghiệm mô phỏng văn hóa, không phải nghi lễ thật';d.style.cssText='position:fixed;right:6px;bottom:6px;max-width:62vw;font-size:10.5px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right';document.body.appendChild(d);return}
+document.getElementById('uhwrap').innerHTML=`<button id="ungho" style="margin:22px auto 0;display:block;padding:12px 22px;border-radius:24px;border:1px solid #f3ead777;background:transparent;color:#f3ead7;font-size:17px;cursor:pointer">☕ Góp ly trà cho người làm game</button>
 <div id="uh" role="dialog" aria-modal="true" aria-label="Ủng hộ người làm game" style="display:none;position:fixed;inset:0;background:#000a;z-index:9;overflow:auto;padding:16px;box-sizing:border-box"><div style="background:#fbf6ea;color:#2a2116;max-width:360px;margin:10px auto;border-radius:16px;padding:18px 16px;text-align:center;position:relative">
 <button id="uhx" aria-label="Đóng" style="position:absolute;top:6px;right:8px;border:0;background:none;font-size:26px;cursor:pointer;color:#2a2116">×</button>
-<h2 style="margin:4px 0 10px;font-size:21px">☕ Ủng hộ ad</h2>
+<h2 style="margin:4px 0 10px;font-size:21px">☕ Góp ly trà cho người làm game</h2>
 <p style="font-size:16px;line-height:1.5;margin:0 0 12px">Game này mình làm tặng sinh nhật cô nhóc ở nhà, đứa suốt ngày bám bố 🥰. Bác nào thấy vui thì ủng hộ mình chút nha. Chúc các bác và gia đình có những phút giây vui vẻ!</p>
-<img src="shared/ungho-qr.png?v=12" alt="Mã VietQR chuyển khoản ủng hộ" style="width:100%;max-width:270px;border-radius:10px">
+<img src="shared/ungho-qr.png?v=13" alt="Mã VietQR chuyển khoản ủng hộ" style="width:100%;max-width:270px;border-radius:10px">
 <p style="font-size:12.5px;opacity:.8;line-height:1.45;margin:10px 0 4px">Khoản này là ủng hộ tự nguyện cho người làm game, không phải cúng dường, công đức hay từ thiện, và không được hoàn lại. Ủng hộ hay không thì trải nghiệm trong game vẫn như nhau.</p>
 <p style="font-size:12.5px;opacity:.8;margin:4px 0 0">Nếu bạn dưới 18 tuổi, hãy hỏi bố mẹ trước khi ủng hộ.</p></div></div>`;
 const m=document.getElementById('uh'),o=()=>{m.style.display='block'},c=()=>{m.style.display='none'};document.getElementById('ungho').onclick=o;document.getElementById('uhx').onclick=c;m.onclick=e=>{if(e.target===m)c()};addEventListener('keydown',e=>{if(e.key==='Escape')c()})})();

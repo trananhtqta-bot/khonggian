@@ -1,5 +1,5 @@
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=12';
+import * as THREE from './three.module.min.js?v=13';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -19,7 +19,7 @@ export function mesh(geo, color, o, pos, rot, scale) {
   m.castShadow = true; m.receiveShadow = true; return m;
 }
 export const LIVE = (() => { try { const q = new URLSearchParams(location.search).get('live'); if (q === '1') sessionStorage.setItem('kg_live', '1'); if (q === '0') sessionStorage.removeItem('kg_live'); return sessionStorage.getItem('kg_live') === '1'; } catch (e) { return false; } })();
-export const LIVE_LABEL = 'Có hình ảnh tạo bởi AI · Trải nghiệm mô phỏng văn hóa, không phải nghi lễ thật';
+export const LIVE_LABEL = 'Game dựng với hỗ trợ AI · Trải nghiệm mô phỏng văn hóa, không phải nghi lễ thật';
 export function label(text, color = '#fff', size = 0.32) {
   const c = document.createElement('canvas'), x = c.getContext('2d'); c.width = 256; c.height = 64;
   x.font = 'bold 30px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
@@ -331,7 +331,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=12', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=13', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
