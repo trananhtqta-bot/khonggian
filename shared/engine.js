@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=18';
+import { getProfile, update as updProfile } from './profile.js?v=19';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=18';
+import * as THREE from './three.module.min.js?v=19';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -169,7 +169,7 @@ const CSS = `
 .kg-ui *{box-sizing:border-box}.kg-ui .pe{pointer-events:auto}
 .kg-top{position:absolute;top:max(8px,env(safe-area-inset-top));left:8px;right:8px;display:flex;gap:6px;align-items:flex-start;justify-content:space-between}
 .kg-title{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:14px;padding:6px 12px;box-shadow:0 4px 18px #0003}
-.kg-title b{font-family:Georgia,serif;font-size:19px;color:var(--accent);display:block}.kg-title small{font-size:13px;opacity:.75}
+.kg-title b{font-family:Georgia,serif;font-size:19px;color:var(--accent);display:block}.kg-title small{font-size:18px;opacity:.85}
 .kg-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
 .kg-btn{border:0;border-radius:12px;padding:10px 14px;min-height:48px;min-width:48px;font:600 18px system-ui;background:var(--panel);color:var(--accent);box-shadow:0 3px 12px #0003;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
 .kg-btn:active{transform:scale(.93)}.kg-btn.main{background:var(--accent);color:var(--panelSolid)}
@@ -178,9 +178,9 @@ const CSS = `
 #kg-ctx{font-size:19px;padding:14px 22px;min-height:56px;margin-bottom:6px;animation:kgp 1.2s infinite}@keyframes kgp{50%{box-shadow:0 0 0 6px var(--glow)}}
 .kg-joy{position:absolute;width:120px;height:120px;border-radius:50%;background:#ffffff26;border:2px solid #ffffff66;display:none;transform:translate(-50%,-50%)}
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
-.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:14px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
-.kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
-.kg-live{position:fixed;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:62vw;font-size:10.5px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right}.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
+.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:18px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
+.kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:18px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
+.kg-live{position:fixed;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:62vw;font-size:18px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right}.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:18px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 .kg-modal{position:absolute;inset:0;background:#0007;display:none;align-items:center;justify-content:center;pointer-events:auto;z-index:20}
 .kg-card{width:min(92vw,420px);max-height:84vh;overflow:auto;background:var(--panelSolid);border-radius:18px;padding:18px;box-shadow:0 20px 60px #0008;animation:kgpop .35s}
@@ -188,21 +188,21 @@ const CSS = `
 @keyframes kgpop{from{transform:scale(.85);opacity:0}}
 .kg-creator{position:absolute;left:0;right:0;bottom:0;max-height:52vh;overflow:auto;background:var(--panelSolid);border-radius:20px 20px 0 0;padding:14px 16px 20px;pointer-events:auto;box-shadow:0 -10px 40px #0005;z-index:15}
 .kg-creator h2{margin:0 0 6px;font:600 20px Georgia,serif;color:var(--accent);text-align:center}
-.kg-row{margin:8px 0}.kg-row>span{font-size:12px;font-weight:700;opacity:.7;display:block;margin-bottom:4px}
-.kg-chips{display:flex;gap:6px;flex-wrap:wrap}.kg-chip{border:2px solid transparent;border-radius:999px;padding:10px 14px;min-height:44px;font-size:15px;background:#0000000f;cursor:pointer}
-.kg-chip.on{border-color:var(--accent);background:var(--glow)}.kg-sw{width:44px;height:44px;padding:0;border-radius:50%}
-.kg-in{width:100%;padding:10px;border-radius:10px;border:1px solid #0003;font-size:16px;background:#fff8}
+.kg-row{margin:8px 0}.kg-row>span{font-size:18px;font-weight:700;opacity:.7;display:block;margin-bottom:4px}
+.kg-chips{display:flex;gap:6px;flex-wrap:wrap}.kg-chip{border:2px solid transparent;border-radius:999px;padding:10px 14px;min-height:48px;font-size:18px;background:#0000000f;cursor:pointer}
+.kg-chip.on{border-color:var(--accent);background:var(--glow)}.kg-sw{width:48px;height:48px;padding:0;border-radius:50%}
+.kg-in{width:100%;padding:10px;border-radius:10px;border:1px solid #0003;font-size:18px;background:#fff8}
 .kg-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .5s;pointer-events:none;z-index:30}
-.kg-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;font-size:10px}.kg-foot a{color:#fff;text-shadow:0 1px 2px #000}
-.kg-map{display:grid;gap:8px}.kg-map button{text-align:left;padding:14px;min-height:56px;border-radius:12px;border:1px solid #0002;background:#ffffff80;font-size:17px;cursor:pointer}
-.kg-map small{display:block;opacity:.7;font-size:12px;margin-top:2px}
+.kg-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;font-size:18px}.kg-foot a{color:#fff;text-shadow:0 1px 2px #000}
+.kg-map{display:grid;gap:8px}.kg-map button{text-align:left;padding:14px;min-height:56px;border-radius:12px;border:1px solid #0002;background:#ffffff80;font-size:18px;cursor:pointer}
+.kg-map small{display:block;opacity:.7;font-size:18px;margin-top:2px}
 
 .kg-icons .kg-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;min-width:58px;line-height:1.1}
-.kg-icons .kg-btn small{font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap}
-.kg-card{font-size:16px}.kg-card p{line-height:1.55}
-.kg-close{position:sticky;top:0;float:right;width:44px;height:44px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
-.kg-outfit{position:absolute;left:50%;transform:translateX(-50%);top:calc(120px + env(safe-area-inset-top));display:flex;gap:6px;z-index:6}.kg-outfit .kg-btn{font-size:18px;min-height:48px}
-.kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 17px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
+.kg-icons .kg-btn small{font-size:18px;font-weight:600;margin-top:2px;white-space:nowrap}
+.kg-card{font-size:18px}.kg-card p{line-height:1.55}
+.kg-close{position:sticky;top:0;float:right;width:48px;height:48px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
+.kg-outfit{position:absolute;left:10px;bottom:calc(190px + env(safe-area-inset-bottom));display:flex;gap:6px;z-index:6}.kg-outfit .kg-btn{font-size:18px;min-height:48px}
+.kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 18px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
 .kg-tut{position:absolute;inset:0;background:#000b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:auto;z-index:25;text-align:center;padding:24px;font-size:19px;line-height:1.5}
 .kg-tut .g{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}.kg-tut .g div{background:#ffffff1a;border-radius:16px;padding:16px;width:min(42vw,220px)}.kg-tut .g i{display:block;font-style:normal;font-size:40px}
 @media (min-width:900px){.kg-acts .row{max-width:520px}}
@@ -210,12 +210,12 @@ const CSS = `
 export function makeUI(theme) {
   const st = document.createElement('style'); st.textContent = CSS + `:root{--accent:${theme.accent};--panel:${theme.panel};--panelSolid:${theme.panelSolid};--glow:${theme.glow}}`; document.head.appendChild(st);
   const ui = document.createElement('div'); ui.className = 'kg-ui';
-  ui.innerHTML = `<div class="kg-top"><div class="kg-title pe"><a href="../" class="kg-brand" title="Dưới Gốc Thị · Bầu trời dưới gốc cây thị" style="display:block;font:600 11px system-ui;letter-spacing:.5px;color:var(--accent);opacity:.8;text-decoration:none;margin-bottom:1px">🌳 DƯỚI GỐC THỊ</a><b>${theme.title}</b><small id="kg-sub">${theme.sub || ''}</small></div><div class="kg-icons" id="kg-icons"></div></div>
+  ui.innerHTML = `<div class="kg-top"><div class="kg-title pe"><a href="../" class="kg-brand" title="Dưới Gốc Thị · Bầu trời dưới gốc cây thị" style="display:flex;align-items:center;min-height:48px;font:600 18px system-ui;letter-spacing:.5px;color:var(--accent);text-decoration:none;margin:-8px 0 0">🌳 DƯỚI GỐC THỊ</a><b>${theme.title}</b><small id="kg-sub">${theme.sub || ''}</small></div><div class="kg-icons" id="kg-icons"></div></div>
   <div class="kg-feed" id="kg-feed"></div><div class="kg-toast" id="kg-toast"></div>
   <div class="kg-hint" id="kg-hint">${isMobile ? 'Kéo bên trái để đi · vuốt bên phải để xoay' : 'WASD / phím mũi tên để đi · kéo chuột để xoay · E để tương tác'}</div>
   <div class="kg-acts"><button class="kg-btn main pe" id="kg-ctx" style="display:none"></button><div class="row" id="kg-acts"></div></div>
   <div class="kg-joy" id="kg-joy"><i></i></div><div class="kg-modal" id="kg-modal"><div class="kg-card" id="kg-card"></div></div><div class="kg-fade" id="kg-fade"></div>
-  ${theme.footer && !LIVE ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}${LIVE ? `<div class="kg-live">${LIVE_LABEL}</div><style>.kg-acts{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 48px)!important}</style>` : ''}`;
+  ${theme.footer && !LIVE ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}${LIVE ? `<div class="kg-live">${LIVE_LABEL}</div><style>.kg-acts{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 100px)!important}.kg-outfit{bottom:calc(290px + env(safe-area-inset-bottom))!important}</style>` : ''}`;
   document.body.appendChild(ui);
   const $ = (id) => ui.querySelector('#' + id);
   const api = {
@@ -333,7 +333,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=18', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=19', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -379,7 +379,7 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
     const chips = (field, obj) => Object.entries(obj).map(([k, v]) => `<button class="kg-chip ${st[field] === k ? 'on' : ''}" data-f="${field}" data-v="${k}">${v}</button>`).join('');
     function openPanel(done) {
       const box = document.createElement('div'); box.className = 'kg-creator';
-      box.innerHTML = `<h2>${quick ? 'Trang phục cho cảnh này' : title}</h2>${hint ? `<p class="kg-ohint" style="margin:2px 0 8px;font-size:16px;opacity:.9">💡 ${hint}</p>` : ''}${quick ? '' : extraNote}${quick ? '' : `<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${cleanName(st.name || '')}"></div>`}
+      box.innerHTML = `<h2>${quick ? 'Trang phục cho cảnh này' : title}</h2>${hint ? `<p class="kg-ohint" style="margin:2px 0 8px;font-size:18px;opacity:.9">💡 ${hint}</p>` : ''}${quick ? '' : extraNote}${quick ? '' : `<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${cleanName(st.name || '')}"></div>`}
       <div class="kg-row"><span>Màu da</span><div class="kg-chips">${SKINS.map(s => `<button class="kg-chip kg-sw ${st.skin === s ? 'on' : ''}" style="background:${s}" data-f="skin" data-v="${s}"></button>`).join('')}</div></div>
       <div class="kg-row"><span>Kiểu tóc</span><div class="kg-chips">${chips('hair', hairs)}</div></div>
       <div class="kg-row"><span>Trang phục</span><div class="kg-chips">${chips('outfit', Object.fromEntries(outfits.map((o, i) => [o.id, o.label + (hint && i === 0 ? ' · gợi ý' : '')])))}</div></div>
@@ -394,11 +394,12 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
       refresh();
       box.querySelector('#kgc-go').onclick = () => { st.name = cleanName(st.name || '').slice(0, 16) || 'Bạn'; localStorage.setItem(key, JSON.stringify(st)); if (!quick) try { updProfile(p => { if (!p.character.name || p.character.name === 'Bạn') p.character.name = st.name; p.character.appearance.skin = st.skin; if (HAIRS_P.includes(st.hair)) p.character.appearance.hair = st.hair; }); } catch { } refresh(); box.remove(); W.frozen = false; P.camDist = oldDist; P.camPitch = oldPitch; P.camYaw = P.yaw + Math.PI; W.sound?.init(); done(); };
     }
-    if (!quick) { openPanel(() => resolve(st)); return; }
+    // lần đầu vào cảnh (chưa có trang phục riêng cho cảnh): mở sẵn bảng trang phục với gợi ý, chờ bấm Xong
+    if (!quick || !saved) { openPanel(() => resolve(st)); return; }
     refresh(); resolve(st);
-    const chip = document.createElement('div'); chip.className = 'kg-outfit pe'; chip.innerHTML = '<button class="kg-btn">👕 Đổi trang phục cho cảnh này?</button><button class="kg-btn" aria-label="Không, cảm ơn">×</button>';
+    const chip = document.createElement('div'); chip.className = 'kg-outfit pe'; chip.innerHTML = '<button class="kg-btn">👕 Đổi trang phục</button><button class="kg-btn" aria-label="Không, cảm ơn">×</button>';
     const [yes, no] = chip.querySelectorAll('button'); yes.onclick = (e) => { e.stopPropagation(); chip.remove(); openPanel(() => { }); }; no.onclick = (e) => { e.stopPropagation(); chip.remove(); };
-    ui.root.appendChild(chip); setTimeout(() => chip.remove(), 15000);
+    ui.root.appendChild(chip);
   });
 }
 const HAIRS_P = ['ngan', 'dai', 'buoi', 'troc'];
@@ -414,7 +415,7 @@ export function shareInvite(ui, { name, text, place }) { if (LIVE) return;
   text = `${text} · Dưới Gốc Thị – Bầu trời dưới gốc cây thị`; const msg = `${text} ${url}`;
   if (navigator.share) navigator.share({ title: document.title, text, url }).catch(() => { });
   else navigator.clipboard?.writeText(msg).then(() => { const n = ui.$('kg-card').querySelector('#kg-copied'); if (n) n.textContent = '✓ Đã chép link'; }).catch(() => { });
-  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:13px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p id="kg-invt" style="font-size:14px;line-height:1.5"></p><input id="kg-invu" class="kg-in" readonly onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
+  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:18px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p id="kg-invt" style="font-size:18px;line-height:1.5"></p><input id="kg-invu" class="kg-in" readonly onclick="this.select()"><p id="kg-copied" style="font-size:18px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:18px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
   <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`, card => { card.querySelector('#kg-invt').textContent = text; card.querySelector('#kg-invu').value = url; });
 }
 /* bỏ link, số điện thoại, ký tự lạ; tối đa 20 ký tự */
@@ -437,7 +438,7 @@ export function leafPatch(W, { center, radius, count = 50, colors = ['#b5803a', 
 export function broom() { const g = new THREE.Group(); const h = mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.1, 6), '#8a6a3a'); h.position.y = -0.2; g.add(h); const b = mesh(new THREE.ConeGeometry(0.16, 0.35, 8), '#d6b56a'); b.position.y = -0.85; g.add(b); g.rotation.x = 0.6; return g; }
 export function beadsView(ui, { title = 'Tràng hạt', mantra = '', total = 108, sound, onRound }) {
   let n = +localStorage.getItem('kg_beads') || 0;
-  ui.modal(`<h2>${title}</h2><div id="bd-ring" style="position:relative;width:240px;height:240px;margin:6px auto;touch-action:none"></div><p style="text-align:center;font-size:22px;margin:4px"><b id="bd-n">${n % total}</b> / ${total}</p><p style="text-align:center;font-style:italic;opacity:.8" id="bd-m">${mantra}</p><p style="text-align:center;font-size:12px;opacity:.6">Chạm vào vòng hạt (hoặc phím Space) để lần một hạt</p>`, card => {
+  ui.modal(`<h2>${title}</h2><div id="bd-ring" style="position:relative;width:240px;height:240px;margin:6px auto;touch-action:none"></div><p style="text-align:center;font-size:22px;margin:4px"><b id="bd-n">${n % total}</b> / ${total}</p><p style="text-align:center;font-style:italic;opacity:.8" id="bd-m">${mantra}</p><p style="text-align:center;font-size:18px;opacity:.85">Chạm vào vòng hạt (hoặc phím Space) để lần một hạt</p>`, card => {
     const ring = card.querySelector('#bd-ring'); const beads = [];
     for (let i = 0; i < 27; i++) { const a = i / 27 * 6.283; const d = document.createElement('div'); Object.assign(d.style, { position: 'absolute', width: '22px', height: '22px', borderRadius: '50%', left: 120 + Math.cos(a) * 100 - 11 + 'px', top: 120 + Math.sin(a) * 100 - 11 + 'px', background: 'radial-gradient(circle at 35% 30%,#e9b98a,#7b3f1d 70%)', boxShadow: '0 2px 4px #0005', transition: 'transform .2s' }); ring.appendChild(d); beads.push(d); }
     const tap = () => { n++; localStorage.setItem('kg_beads', n); card.querySelector('#bd-n').textContent = n % total; const b = beads[n % 27]; b.style.transform = 'scale(1.35)'; setTimeout(() => b.style.transform = '', 200); sound?.tone(660, 0.25, 0.05); if (n % total === 0) { sound?.bell(220, 0.2); onRound?.(); } };
@@ -445,7 +446,7 @@ export function beadsView(ui, { title = 'Tràng hạt', mantra = '', total = 108
   });
 }
 export function reader(ui, { title, sub, lines, beat = 2.2, onLine, onEnd, verb = 'Đang đọc' }) {
-  ui.modal(`<h2>${title}</h2>${sub ? `<p style="text-align:center;font-size:12px;opacity:.7;margin:-4px 0 8px">${sub}</p>` : ''}<div id="rd" style="font-size:17px;line-height:1.8;text-align:center"></div><p id="rdp" style="text-align:center;font-size:14px;opacity:.75;margin:8px 0 0"></p>`, card => {
+  ui.modal(`<h2>${title}</h2>${sub ? `<p style="text-align:center;font-size:18px;opacity:.7;margin:-4px 0 8px">${sub}</p>` : ''}<div id="rd" style="font-size:18px;line-height:1.8;text-align:center"></div><p id="rdp" style="text-align:center;font-size:18px;opacity:.75;margin:8px 0 0"></p>`, card => {
     const rdp = card.querySelector('#rdp'), T0 = Date.now(), TT = lines.length * beat; const tk = setInterval(() => { if (ui.$('kg-modal').style.display === 'none') return clearInterval(tk); const left = Math.max(0, Math.ceil(TT - (Date.now() - T0) / 1000)); rdp.textContent = left ? `${verb}… còn ${left} giây` : 'Xong'; if (!left) clearInterval(tk); }, 250);
     const rd = card.querySelector('#rd'); rd.innerHTML = lines.map((l, i) => `<div data-i="${i}" style="opacity:.35;transition:all .4s">${l}</div>`).join('');
     let i = 0; const go = () => { if (ui.$('kg-modal').style.display === 'none') return; rd.querySelectorAll('div').forEach((d, j) => { d.style.opacity = j === i ? 1 : j < i ? .55 : .35; d.style.fontWeight = j === i ? 700 : 400; d.style.color = j === i ? 'var(--accent)' : ''; });
