@@ -1,5 +1,5 @@
 {
- "name": "Đò về Hương Sơn",
+ "name": "Đò về Hương Sơn · Dưới Gốc Thị",
  "short_name": "Hương Sơn",
  "lang": "vi",
  "start_url": "./",
@@ -20,5 +20,6 @@
    "type": "image/png",
    "purpose": "any maskable"
   }
- ]
+ ],
+ "description": "Bầu trời dưới gốc cây thị – "
 }

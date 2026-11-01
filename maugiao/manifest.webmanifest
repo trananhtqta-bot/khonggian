@@ -1,5 +1,5 @@
 {
- "name": "Lớp Mẫu Giáo Ngày Xưa",
+ "name": "Lớp Mẫu Giáo Ngày Xưa · Dưới Gốc Thị",
  "short_name": "Mẫu Giáo",
  "lang": "vi",
  "start_url": "./",
@@ -20,5 +20,6 @@
    "type": "image/png",
    "purpose": "any maskable"
   }
- ]
+ ],
+ "description": "Bầu trời dưới gốc cây thị – "
 }

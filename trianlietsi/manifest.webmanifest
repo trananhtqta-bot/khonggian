@@ -1,5 +1,5 @@
 {
- "name": "Tri Ân Liệt Sĩ",
+ "name": "Tri Ân Liệt Sĩ · Dưới Gốc Thị",
  "short_name": "Tri Ân",
  "lang": "vi",
  "start_url": "./",
@@ -20,5 +20,6 @@
    "type": "image/png",
    "purpose": "any maskable"
   }
- ]
+ ],
+ "description": "Bầu trời dưới gốc cây thị – "
 }

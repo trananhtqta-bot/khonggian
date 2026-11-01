@@ -1,4 +1,4 @@
-// Khong Gian Viet - small 3D engine (our own code). three.js r164 vendored.
+// Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
 import * as THREE from './three.module.min.js?v=5';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
@@ -177,7 +177,7 @@ const CSS = `
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
 .kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:14px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
 .kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
-.kg-feed{position:absolute;left:8px;top:calc(118px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
+.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 .kg-modal{position:absolute;inset:0;background:#0007;display:none;align-items:center;justify-content:center;pointer-events:auto;z-index:20}
 .kg-card{width:min(92vw,420px);max-height:84vh;overflow:auto;background:var(--panelSolid);border-radius:18px;padding:18px;box-shadow:0 20px 60px #0008;animation:kgpop .35s}
@@ -208,7 +208,7 @@ const CSS = `
 export function makeUI(theme) {
   const st = document.createElement('style'); st.textContent = CSS + `:root{--accent:${theme.accent};--panel:${theme.panel};--panelSolid:${theme.panelSolid};--glow:${theme.glow}}`; document.head.appendChild(st);
   const ui = document.createElement('div'); ui.className = 'kg-ui';
-  ui.innerHTML = `<div class="kg-top"><div class="kg-title pe"><b>${theme.title}</b><small id="kg-sub">${theme.sub || ''}</small></div><div class="kg-icons" id="kg-icons"></div></div>
+  ui.innerHTML = `<div class="kg-top"><div class="kg-title pe"><a href="../" class="kg-brand" title="Dưới Gốc Thị · Bầu trời dưới gốc cây thị" style="display:block;font:600 11px system-ui;letter-spacing:.5px;color:var(--accent);opacity:.8;text-decoration:none;margin-bottom:1px">🌳 DƯỚI GỐC THỊ</a><b>${theme.title}</b><small id="kg-sub">${theme.sub || ''}</small></div><div class="kg-icons" id="kg-icons"></div></div>
   <div class="kg-feed" id="kg-feed"></div><div class="kg-toast" id="kg-toast"></div>
   <div class="kg-hint" id="kg-hint">${isMobile ? 'Kéo bên trái để đi · vuốt bên phải để xoay' : 'WASD / phím mũi tên để đi · kéo chuột để xoay · E để tương tác'}</div>
   <div class="kg-acts"><button class="kg-btn main pe" id="kg-ctx" style="display:none"></button><div class="row" id="kg-acts"></div></div>
@@ -393,10 +393,10 @@ export function mapView(W, ui, areas, title = 'Bản đồ') {
 }
 export function shareInvite(ui, { name, text, place }) {
   const u = new URL(location.href); u.search = ''; u.searchParams.set('ref', name || 'ban'); if (place) u.searchParams.set('o', place); const url = u.toString();
-  const msg = `${text} ${url}`;
+  text = `${text} · Dưới Gốc Thị – Bầu trời dưới gốc cây thị`; const msg = `${text} ${url}`;
   if (navigator.share) navigator.share({ title: document.title, text, url }).catch(() => { });
   else navigator.clipboard?.writeText(msg).then(() => { const n = ui.$('kg-card').querySelector('#kg-copied'); if (n) n.textContent = '✓ Đã chép link'; }).catch(() => { });
-  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
+  ui.modal(`<h2>Mời bạn cùng đến</h2><p style="text-align:center;font-size:13px;opacity:.75;margin:0 0 6px">Dưới Gốc Thị · Bầu trời dưới gốc cây thị</p><p style="font-size:14px;line-height:1.5">${text}</p><input class="kg-in" readonly value="${url}" onclick="this.select()"><p id="kg-copied" style="font-size:14px;color:var(--accent);margin:6px 0 0"></p><p style="font-size:12px;opacity:.7;margin-top:8px">Người bạn mời sẽ thấy lời chào từ bạn khi bấm vào link.</p>
   <div style="display:flex;gap:8px;margin-top:10px;justify-content:center"><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">Facebook</a><a class="kg-btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://zalo.me/share?url=${encodeURIComponent(url)}">Zalo</a></div>`);
 }
 export function refGreeting(ui, fmt) { const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => ui.toast(fmt(r.slice(0, 20)), 5000), 1500); }
