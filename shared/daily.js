@@ -1,4 +1,4 @@
-import { addProgress, touch } from './profile.js?v=19';
+import { addProgress, touch } from './profile.js?v=20';
 /* Chuỗi ngày + việc nhỏ mỗi ngày — chỉ lưu trên máy (localStorage), không số ảo */
 const K = 'kg_daily';
 export const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -34,9 +34,9 @@ export function dailyTasks({ ui, ST, page, tasks, icons, solemn = false, chime }
         const msg = solemn ? (all ? 'Xin cảm ơn bạn đã đến viếng' : (t.doneMsg || 'Xin cảm ơn bạn')) : (all ? 'Hôm nay bạn đã trọn một ngày an lành · cây thị đã được chăm 🌱' : `✔ Đã xong: ${t.text}`);
         setTimeout(() => (all && !solemn) ? allDoneCard() : ui.toast(msg, 3500), 600); if (!solemn && chime) chime(); } } return r; };
   const open = () => { const done = doneToday(page), st = streakNow();
-    ui.modal(`<h2>Việc nhỏ hôm nay</h2>${solemn ? '<p style="text-align:center;font-size:18px;margin:4px 0 10px;opacity:.8">Những việc tri ân lặng lẽ, không tính điểm.</p>' : `<p style="text-align:center;font-size:18px;margin:4px 0 10px">${st ? `Bạn đã ghé <b>${st}</b> ngày liền` : 'Làm một việc nhỏ để bắt đầu chuỗi ngày'}</p><p style="text-align:center;font-size:18px;opacity:.7;margin:-4px 0 8px">Mỗi tuần được nghỉ 1 ngày mà chuỗi vẫn giữ.</p>`}
-      ${tasks.map((t, i) => { const ok = done.includes(t.id); return `<button class="kg-btn kgd-row" data-i="${i}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:8px 0;font-size:20px;text-align:left;${ok ? 'opacity:.75' : ''}"><span style="font-size:28px;width:36px;text-align:center">${ok ? '✅' : t.icon}</span><span style="flex:1">${t.text}<br><small style="font-size:18px;opacity:.8">${ok ? 'Đã xong hôm nay' : t.hint}</small></span>${ok ? '' : '<span style="font-size:22px">›</span>'}</button>`; }).join('')}
-      <p style="text-align:center;font-size:18px;opacity:.75;margin-top:10px">Bấm vào một việc để được đưa tới chỗ làm.<br>Mai lại có việc mới.</p>
+    ui.modal(`<h2>Việc nhỏ hôm nay</h2>${solemn ? '<p style="text-align:center;font-size:18px;margin:4px 0 10px">Những việc tri ân lặng lẽ, không tính điểm.</p>' : `<p style="text-align:center;font-size:18px;margin:4px 0 10px">${st ? `Bạn đã ghé <b>${st}</b> ngày liền` : 'Làm một việc nhỏ để bắt đầu chuỗi ngày'}</p><p style="text-align:center;font-size:18px;margin:-4px 0 8px">Mỗi tuần được nghỉ 1 ngày mà chuỗi vẫn giữ.</p>`}
+      ${tasks.map((t, i) => { const ok = done.includes(t.id); return `<button class="kg-btn kgd-row" data-i="${i}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:8px 0;font-size:20px;text-align:left;${ok ? 'opacity:.75' : ''}"><span style="font-size:28px;width:36px;text-align:center">${ok ? '✅' : t.icon}</span><span style="flex:1">${t.text}<br><small style="font-size:18px">${ok ? 'Đã xong hôm nay' : t.hint}</small></span>${ok ? '' : '<span style="font-size:22px">›</span>'}</button>`; }).join('')}
+      <p style="text-align:center;font-size:18px;margin-top:10px">Bấm vào một việc để được đưa tới chỗ làm.<br>Mai lại có việc mới.</p>
       <button class="kg-btn" id="kgd-x" style="width:100%;min-height:56px;font-size:19px;margin-top:6px">Đóng</button>`,
       c => { c.querySelector('#kgd-x').onclick = () => ui.close(); c.querySelectorAll('.kgd-row').forEach(b => b.onclick = () => { const t = tasks[+b.dataset.i]; ui.close(); if (!done.includes(t.id)) t.go?.(); }); }); };
   btn = icons('📋', 'Hôm nay', open); refresh();

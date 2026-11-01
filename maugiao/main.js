@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=19';
-import { dailyTasks, doneToday } from '../shared/daily.js?v=19';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=20';
+import { dailyTasks, doneToday } from '../shared/daily.js?v=20';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
@@ -173,7 +173,7 @@ function startMusic() { S.init(); S.stopMusic(); S.music({ scale: [0, 2, 4, 7, 9
 let amb = false; W.onFirstInput = () => { if (amb) return; amb = true; S.init(); S.ambient('birds', 0.12); startMusic(); };
 W.start(); document.getElementById('load').style.opacity = 0; setTimeout(() => document.getElementById('load').remove(), 700);
 refGreeting(ui, r => `${r} rủ bạn về lớp mẫu giáo ngày xưa 🎒`);
-await avatarCreator(W, ui, { key: 'kg_av_mg', title: 'Chuẩn bị đi học nào!', outfits: [{ id: 'dongphuc', label: 'Áo trắng quần xanh', ap: { top: '#ffffff', bottom: '#2c4a8a', style: 'ao' } }, { id: 'yem', label: 'Áo yếm đỏ', ap: { top: '#c0392b', bottom: '#f6f1e6', style: 'yem' } }, { id: 'hong', label: 'Váy hồng', ap: { top: '#ffb3c6', bottom: '#ffb3c6', style: 'aodai' } }, { id: 'kesoc', label: 'Áo kẻ sọc', ap: { top: '#7fb3e0', bottom: '#5a4632', style: 'ao' } }, { id: 'cogiao', label: 'Áo dài cô giáo', ap: { top: '#e75f7b', bottom: '#f6f1e6', style: 'aodai' } }],
+await avatarCreator(W, ui, { key: 'kg_av_mg', title: 'Chuẩn bị đi học nào!', hint: 'Đi học nên mặc đồng phục gọn gàng: áo trắng quần xanh.', outfits: [{ id: 'dongphuc', label: 'Áo trắng quần xanh', ap: { top: '#ffffff', bottom: '#2c4a8a', style: 'ao' } }, { id: 'yem', label: 'Áo yếm đỏ', ap: { top: '#c0392b', bottom: '#f6f1e6', style: 'yem' } }, { id: 'hong', label: 'Váy hồng', ap: { top: '#ffb3c6', bottom: '#ffb3c6', style: 'aodai' } }, { id: 'kesoc', label: 'Áo kẻ sọc', ap: { top: '#7fb3e0', bottom: '#5a4632', style: 'ao' } }, { id: 'cogiao', label: 'Áo dài cô giáo', ap: { top: '#e75f7b', bottom: '#f6f1e6', style: 'aodai' } }],
   hats: { none: 'Không', tai_beo: 'Mũ tai bèo', no: 'Nơ cài tóc' }, hairs: { troc: 'Đầu trọc', ngan: 'Tóc ngắn', choi: 'Hai búi', dai: 'Tóc dài' }, pets: { none: 'Không', cat: 'Mèo mướp', chick: 'Gà con' }, defaults: { scale: 0.85 } });
 if (!amb) W.onFirstInput(); drawChart(); setPhase(0);
 W.restorePos(); ui.tutorial('move', MOVE_TUT);

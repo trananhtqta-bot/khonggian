@@ -1,7 +1,7 @@
 // Dưới Gốc Thị – offline cache (network-first for pages, cache-first for static assets)
-const V = 'kg-v19';
-const CORE = ['./', './shared/engine.js?v=19', './shared/daily.js?v=19', './shared/profile.js?v=19', './shared/hub.js?v=19', './shared/three.module.min.js?v=19',
-  './dovehuongson/', './dovehuongson/main.js?v=19', './maugiao/', './maugiao/main.js?v=19', './trianlietsi/', './trianlietsi/main.js?v=19', './shared/ungho-qr.png'];
+const V = 'kg-v20';
+const CORE = ['./', './shared/engine.js?v=20', './shared/daily.js?v=20', './shared/profile.js?v=20', './shared/hub.js?v=20', './shared/three.module.min.js?v=20',
+  './dovehuongson/', './dovehuongson/main.js?v=20', './maugiao/', './maugiao/main.js?v=20', './trianlietsi/', './trianlietsi/main.js?v=20', './shared/ungho-qr.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(CORE)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

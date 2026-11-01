@@ -70,8 +70,11 @@ function purgeOld() { // xoá theo lô: đọc hết, lọc, ghi lại một l�
   try { const sh = sheet_(), last = sh.getLastRow(); if (last < 2) return; const cut = Date.now() - RETAIN_MS;
     const rng = sh.getRange(2, 1, last - 1, 3), vals = rng.getValues();
     const keep = vals.filter(r => (Number(r[2]) || 0) >= cut); if (keep.length === vals.length) return;
-    rng.clearContent(); if (keep.length) sh.getRange(2, 1, keep.length, 3).setValues(keep);
-    const extra = sh.getMaxRows() - Math.max(keep.length + 1, 2); if (extra > 0) sh.deleteRows(Math.max(keep.length + 1, 2) + 1, extra);
+    // ghi các dòng giữ lại lên đầu TRƯỚC; chỉ khi ghi xong mới xoá phần đuôi thừa -> lỗi giữa chừng không làm mất dữ liệu
+    if (keep.length) sh.getRange(2, 1, keep.length, 3).setValues(keep);
+    SpreadsheetApp.flush();
+    const tail = vals.length - keep.length; if (tail > 0) sh.getRange(keep.length + 2, 1, tail, 3).clearContent();
+    const lastKeep = Math.max(keep.length + 1, 2), extra = sh.getMaxRows() - lastKeep; if (extra > 0) sh.deleteRows(lastKeep + 1, extra);
   } finally { lock.releaseLock(); } }
 
 /** Chạy MỘT LẦN trong trình soạn thảo: tạo pepper (nếu chưa có), định dạng cột Plain text, tạo trigger dọn dữ liệu hằng ngày. */

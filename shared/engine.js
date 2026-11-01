@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=19';
+import { getProfile, update as updProfile } from './profile.js?v=20';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=19';
+import * as THREE from './three.module.min.js?v=20';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -178,7 +178,7 @@ const CSS = `
 #kg-ctx{font-size:19px;padding:14px 22px;min-height:56px;margin-bottom:6px;animation:kgp 1.2s infinite}@keyframes kgp{50%{box-shadow:0 0 0 6px var(--glow)}}
 .kg-joy{position:absolute;width:120px;height:120px;border-radius:50%;background:#ffffff26;border:2px solid #ffffff66;display:none;transform:translate(-50%,-50%)}
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
-.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:18px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
+.kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:18px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:10px}
 .kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:18px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
 .kg-live{position:fixed;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:62vw;font-size:18px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right}.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:18px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
@@ -188,19 +188,19 @@ const CSS = `
 @keyframes kgpop{from{transform:scale(.85);opacity:0}}
 .kg-creator{position:absolute;left:0;right:0;bottom:0;max-height:52vh;overflow:auto;background:var(--panelSolid);border-radius:20px 20px 0 0;padding:14px 16px 20px;pointer-events:auto;box-shadow:0 -10px 40px #0005;z-index:15}
 .kg-creator h2{margin:0 0 6px;font:600 20px Georgia,serif;color:var(--accent);text-align:center}
-.kg-row{margin:8px 0}.kg-row>span{font-size:18px;font-weight:700;opacity:.7;display:block;margin-bottom:4px}
+.kg-row{margin:8px 0}.kg-row>span{font-size:18px;font-weight:700;display:block;margin-bottom:4px}
 .kg-chips{display:flex;gap:6px;flex-wrap:wrap}.kg-chip{border:2px solid transparent;border-radius:999px;padding:10px 14px;min-height:48px;font-size:18px;background:#0000000f;cursor:pointer}
 .kg-chip.on{border-color:var(--accent);background:var(--glow)}.kg-sw{width:48px;height:48px;padding:0;border-radius:50%}
 .kg-in{width:100%;padding:10px;border-radius:10px;border:1px solid #0003;font-size:18px;background:#fff8}
 .kg-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .5s;pointer-events:none;z-index:30}
-.kg-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;font-size:18px}.kg-foot a{color:#fff;text-shadow:0 1px 2px #000}
+.kg-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:2px;font-size:18px;color:#fff;background:rgba(0,0,0,.6);padding:2px 10px;border-radius:8px;white-space:nowrap}.kg-foot a{color:#fff;text-shadow:0 1px 2px #000}
 .kg-map{display:grid;gap:8px}.kg-map button{text-align:left;padding:14px;min-height:56px;border-radius:12px;border:1px solid #0002;background:#ffffff80;font-size:18px;cursor:pointer}
-.kg-map small{display:block;opacity:.7;font-size:18px;margin-top:2px}
+.kg-map small{display:block;font-size:18px;margin-top:2px}
 
 .kg-icons .kg-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;min-width:58px;line-height:1.1}
 .kg-icons .kg-btn small{font-size:18px;font-weight:600;margin-top:2px;white-space:nowrap}
 .kg-card{font-size:18px}.kg-card p{line-height:1.55}
-.kg-close{position:sticky;top:0;float:right;width:48px;height:48px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
+.kg-close{position:sticky;top:0;float:right;width:50px;height:50px;border-radius:50%;border:0;background:#0000001a;font-size:22px;cursor:pointer;margin:-6px -6px 0 0}
 .kg-outfit{position:absolute;left:10px;bottom:calc(190px + env(safe-area-inset-bottom));display:flex;gap:6px;z-index:6}.kg-outfit .kg-btn{font-size:18px;min-height:48px}
 .kg-bego{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;padding:12px 16px;border-radius:14px;background:#7a4a22;color:#fff8e8!important;font:700 18px system-ui;text-decoration:none;box-shadow:0 4px 14px #0003}
 .kg-tut{position:absolute;inset:0;background:#000b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:auto;z-index:25;text-align:center;padding:24px;font-size:19px;line-height:1.5}
@@ -333,7 +333,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=19', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=20', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;

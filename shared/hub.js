@@ -1,7 +1,7 @@
 // Hub: tạo nhân vật, thẻ nhân vật, nhà riêng, mã nhà
 const normCode = s => String(s || '').toUpperCase().replace(/\s+/g, '').trim();
-import { load as loadDaily, doneToday } from './daily.js?v=19';
-import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=19';
+import { load as loadDaily, doneToday } from './daily.js?v=20';
+import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=20';
 const LIVE = !!window.KG_LIVE;
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
