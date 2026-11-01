@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=14';
+import { getProfile, update as updProfile } from './profile.js?v=15';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=14';
+import * as THREE from './three.module.min.js?v=15';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -332,7 +332,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=14', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=15', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;

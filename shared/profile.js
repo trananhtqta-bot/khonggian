@@ -1,6 +1,6 @@
 /* Hồ sơ nhân vật dùng chung + nhà riêng + mã nhà (lưu chéo thiết bị).
    localStorage là nơi lưu chính; máy chủ (Apps Script) chỉ là bản sao theo mã. Không thu thông tin cá nhân. */
-export const SYNC_URL = ''; // dán URL web app Apps Script (…/exec) vào đây sau khi triển khai
+export const SYNC_URL = 'https://script.google.com/macros/s/AKfycbybb1elUKdMTVSHLM8FfedMJXqqYU4dtkjakYoi4q8Gx152pFlYYEpngP6AIEje9TFT/exec'; // dán URL web app Apps Script (…/exec) vào đây sau khi triển khai
 export const SCHEMA_VERSION = 1;
 const PK = 'kg_profile', CK = 'kg_house_code', MAX = 20000;
 const ALPHA = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // 31 ký tự, bỏ 0 O 1 I L
