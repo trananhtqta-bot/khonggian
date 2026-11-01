@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=11';
-import { dailyTasks } from '../shared/daily.js?v=11';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT, LIVE } from '../shared/engine.js?v=12';
+import { dailyTasks } from '../shared/daily.js?v=12';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
 const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
@@ -49,7 +49,7 @@ const WALL = { x: 0, z: -51 }; const wallC = document.createElement('canvas'); w
 { const w = mesh(new THREE.BoxGeometry(14, 3.4, 0.6), '#8f8676'); w.position.set(WALL.x, 1.7, WALL.z - 0.4); W.scene.add(w); const f = new THREE.Mesh(new THREE.PlaneGeometry(13, 3.0), new THREE.MeshStandardMaterial({ map: wallT, roughness: 0.6 })); f.position.set(WALL.x, 1.7, WALL.z - 0.09); W.scene.add(f); W.addBox(WALL.x, WALL.z - 0.4, 7, 0.4); }
 const OWN = () => JSON.parse(localStorage.getItem('trian_msgs') || '[]');
 const SEED = ['Đời đời nhớ ơn các anh hùng liệt sĩ', 'Các anh nằm xuống cho quê hương đứng lên', 'Con cháu mãi ghi nhớ công ơn', 'Hòa bình hôm nay là máu xương các anh', 'Uống nước nhớ nguồn', 'Xin thắp nén hương lòng tưởng nhớ'];
-function drawWall() { const g = wallC.getContext('2d'); g.fillStyle = '#3b3631'; g.fillRect(0, 0, 1024, 512); g.fillStyle = '#e9cf8a'; g.font = 'bold 46px Georgia'; g.textAlign = 'center'; g.fillText('TƯỜNG TRI ÂN', 512, 62); g.font = 'italic 26px Georgia'; const all = [...OWN().map(m => `“${m.t}” — ${m.n}`), ...SEED].slice(0, 12); all.forEach((t, i) => { g.fillStyle = i < OWN().length ? '#fff4d6' : '#d8ccb0'; g.fillText(t.slice(0, 60), i % 2 ? 760 : 264, 120 + Math.floor(i / 2) * 64); }); wallT.needsUpdate = true; }
+function drawWall() { const g = wallC.getContext('2d'); g.fillStyle = '#3b3631'; g.fillRect(0, 0, 1024, 512); g.fillStyle = '#e9cf8a'; g.font = 'bold 46px Georgia'; g.textAlign = 'center'; g.fillText('TƯỜNG TRI ÂN', 512, 62); g.font = 'italic 26px Georgia'; const own = LIVE ? [] : OWN(); const all = [...own.map(m => `“${m.t}” — ${m.n}`), ...SEED].slice(0, 12); all.forEach((t, i) => { g.fillStyle = i < own.length ? '#fff4d6' : '#d8ccb0'; g.fillText(t.slice(0, 60), i % 2 ? 760 : 264, 120 + Math.floor(i / 2) * 64); }); wallT.needsUpdate = true; }
 drawWall();
 // path lanterns (emissive) + a few real lights
 { const N = 24, im = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 0.32, 0.22), mat('#ffd9a0', { emissive: '#ffae4a', emissiveIntensity: 1.6 }), N), posts = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 5), mat('#3a3a3a'), N); const m4 = new THREE.Matrix4(); let i = 0;
@@ -80,7 +80,7 @@ W.addInteract(G); let near = null;
 W.onUpdate(() => { const P = W.player.pos; let b = null, bd = 99; for (const g of graves) { const d = Math.hypot(g.x - P.x, g.z + 1.3 - P.z); if (d < bd) { bd = d; b = g; } } near = bd < 2.5 ? b : null; if (b) { G.pos.x = b.x; G.pos.z = b.z + 1.3; } G.enabled = !!near; });
 function doIncense() { if (near) { incense(near.x - 0.3, near.z - 0.6, 0.35); bow(W.player.av); S.bell(110, 0.12); ST.add('huong'); ui.toast('Nén hương thơm dâng lên người đã khuất'); } }
 W.addInteract({ pos: { x: 0, z: 3.8 }, r: 2.4, label: '🕯️ Dâng hương Đài tưởng niệm', use: () => { incense(0, 2.6, 1.3); bow(W.player.av); S.bell(98, 0.2); ST.add('huong'); ui.toast('Kính cẩn nghiêng mình trước anh linh các anh hùng liệt sĩ'); } });
-W.addInteract({ pos: { x: WALL.x, z: WALL.z + 2 }, r: 3, label: '✍️ Viết lời tri ân', use: () => writeMsg() });
+if (!LIVE) W.addInteract({ pos: { x: WALL.x, z: WALL.z + 2 }, r: 3, label: '✍️ Viết lời tri ân', use: () => writeMsg() });
 const BAD = '\u0000bad';
 const _BW = ['dm','d m','dmm','dcm','d c m','dkm','d k m','djt','du ma','dech','vl','v l','vcl','vkl','clgt','me may','cho chet','oc cho','fuck','shit','bitch','cc','cl','vai lon','cai lon','con cac','an cut','thang ngu','do ngu','l0n','bu0i','dit'];
 const _BA = /(^|[^\p{L}])(địt|đụ|đéo|lồn|buồi|cặc|cứt|đĩ|ngu như)(?![\p{L}])/iu;
@@ -105,7 +105,7 @@ function silence() { const a = W.player.av; W.frozen = true; a.pray = true; S.st
 const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
 icons('🗺️', 'Bản đồ', () => mapView(W, ui, [{ label: 'Cổng nghĩa trang', icon: '⛩️', desc: 'Lối vào', pos: [0, 40], yaw: Math.PI }, { label: 'Đài tưởng niệm', icon: '🕯️', desc: 'Dâng hương chung', pos: [0, 5], yaw: Math.PI }, { label: 'Khu mộ', icon: '🪦', desc: 'Thắp hương, đặt hoa, quét lá', pos: [4.6, -24], yaw: Math.PI / 2 }, { label: 'Tường tri ân', icon: '✍️', desc: 'Khắc lời tưởng nhớ', pos: [0, -46], yaw: Math.PI }], 'Sơ đồ nghĩa trang'));
 icons('📊', 'Hành trình', () => { const s = ST.s; const v = Object.values(s).some(x => x > 0); ui.modal(`<h2>Hành trình tri ân</h2><p style="text-align:center;font-size:18px;line-height:1.7">${v ? '🕯️ Bạn đã ghé viếng.<br>Xin cảm ơn tấm lòng của bạn.' : 'Bạn chưa thắp hương hay đặt hoa lần nào.<br>Xin mời bạn đi dọc hàng mộ.'}</p>`); });
-icons('💌', 'Mời viếng', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} mời bạn cùng thắp một nén hương tri ân các anh hùng liệt sĩ.`, place: 'trian' }));
+if (!LIVE) icons('💌', 'Mời viếng', () => shareInvite(ui, { name: W.player.name, text: `${W.player.name} mời bạn cùng thắp một nén hương tri ân các anh hùng liệt sĩ.`, place: 'trian' }));
 icons('🔊', 'Âm thanh', b => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.music({ scale: [0, 3, 5, 7, 10], root: 196, beat: 1.6, inst: 'flute', gong: 12, rest: 0.5 }); }
 // (no simulated online counter / activity feed — this is a place of remembrance)
@@ -127,3 +127,5 @@ dailyTasks({ ui, ST, page: 'trian', icons, solemn: true, tasks: [
   { id: 'huong', icon: '🕯️', text: 'Thắp một nén hương', hint: 'Đến Đài tưởng niệm (Bản đồ), bấm Dâng hương', doneMsg: 'Đã dâng hương', keys: ['huong'], go: () => ui.fade(() => { W.teleport(0, 5.4, Math.PI); ui.toast('Bấm “Dâng hương Đài tưởng niệm” ở dưới màn hình', 5000); }) },
   { id: 'hoa', icon: '💐', text: 'Đặt một bó hoa', hint: 'Trước một phần mộ', doneMsg: 'Đã dâng hoa', keys: ['hoa'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Đặt hoa”') },
   { id: 'macniem', icon: '🙇', text: 'Mặc niệm', doneMsg: 'Đã mặc niệm', hint: 'Đứng lặng, cúi đầu tưởng nhớ', keys: ['macniem'], go: () => clickAct('Mặc niệm') }] });
+
+if (LIVE) { const b = document.createElement('div'); b.textContent = 'Phần này mình đi chậm, xin phép không nhận quà'; b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));background:#0009;color:#fff;font-size:12.5px;padding:4px 10px;border-radius:10px;z-index:30;pointer-events:none;white-space:nowrap'; document.body.appendChild(b); }

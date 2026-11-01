@@ -1,7 +1,7 @@
 // Dưới Gốc Thị – offline cache (network-first for pages, cache-first for static assets)
-const V = 'kg-v11';
-const CORE = ['./', './shared/engine.js?v=11', './shared/daily.js?v=11', './shared/three.module.min.js?v=11',
-  './dovehuongson/', './dovehuongson/main.js?v=11', './maugiao/', './maugiao/main.js?v=11', './trianlietsi/', './trianlietsi/main.js?v=11'];
+const V = 'kg-v12';
+const CORE = ['./', './shared/engine.js?v=12', './shared/daily.js?v=12', './shared/three.module.min.js?v=12',
+  './dovehuongson/', './dovehuongson/main.js?v=12', './maugiao/', './maugiao/main.js?v=12', './trianlietsi/', './trianlietsi/main.js?v=12'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(CORE)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

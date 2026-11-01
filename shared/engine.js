@@ -1,5 +1,5 @@
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=11';
+import * as THREE from './three.module.min.js?v=12';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -18,6 +18,8 @@ export function mesh(geo, color, o, pos, rot, scale) {
   if (pos) m.position.set(...pos); if (rot) m.rotation.set(...rot); if (scale) m.scale.set(...scale);
   m.castShadow = true; m.receiveShadow = true; return m;
 }
+export const LIVE = (() => { try { const q = new URLSearchParams(location.search).get('live'); if (q === '1') sessionStorage.setItem('kg_live', '1'); if (q === '0') sessionStorage.removeItem('kg_live'); return sessionStorage.getItem('kg_live') === '1'; } catch (e) { return false; } })();
+export const LIVE_LABEL = 'Có hình ảnh tạo bởi AI · Trải nghiệm mô phỏng văn hóa, không phải nghi lễ thật';
 export function label(text, color = '#fff', size = 0.32) {
   const c = document.createElement('canvas'), x = c.getContext('2d'); c.width = 256; c.height = 64;
   x.font = 'bold 30px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
@@ -90,7 +92,7 @@ export function makeAvatar(ap = {}) {
   root.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return av;
 }
-export function setNameTag(av, name, color) { if (av.tag) av.root.remove(av.tag); av.tag = label(name, color); av.tag.position.y = av.tagY || 1.85; av.root.add(av.tag); }
+export function setNameTag(av, name, color) { if (av.tag) av.root.remove(av.tag); if (LIVE) { av.tag = null; return; } av.tag = label(name, color); av.tag.position.y = av.tagY || 1.85; av.root.add(av.tag); }
 export function animateAvatar(av, dt, speed = 0, t = performance.now() / 1000) {
   av.walk += dt * speed * 3.2;
   const s = Math.sin(av.walk) * clamp(speed / 2.5, 0, 1) * 0.7;
@@ -177,7 +179,7 @@ const CSS = `
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
 .kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:14px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
 .kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
-.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
+.kg-live{position:fixed;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:62vw;font-size:10.5px;line-height:1.3;color:#fff;background:#0008;padding:3px 7px;border-radius:8px;pointer-events:none;z-index:30;text-align:right}.kg-feed{position:absolute;left:8px;top:calc(134px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 .kg-modal{position:absolute;inset:0;background:#0007;display:none;align-items:center;justify-content:center;pointer-events:auto;z-index:20}
 .kg-card{width:min(92vw,420px);max-height:84vh;overflow:auto;background:var(--panelSolid);border-radius:18px;padding:18px;box-shadow:0 20px 60px #0008;animation:kgpop .35s}
@@ -211,7 +213,7 @@ export function makeUI(theme) {
   <div class="kg-hint" id="kg-hint">${isMobile ? 'Kéo bên trái để đi · vuốt bên phải để xoay' : 'WASD / phím mũi tên để đi · kéo chuột để xoay · E để tương tác'}</div>
   <div class="kg-acts"><button class="kg-btn main pe" id="kg-ctx" style="display:none"></button><div class="row" id="kg-acts"></div></div>
   <div class="kg-joy" id="kg-joy"><i></i></div><div class="kg-modal" id="kg-modal"><div class="kg-card" id="kg-card"></div></div><div class="kg-fade" id="kg-fade"></div>
-  ${theme.footer ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}`;
+  ${theme.footer && !LIVE ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}${LIVE ? `<div class="kg-live">${LIVE_LABEL}</div>` : ''}`;
   document.body.appendChild(ui);
   const $ = (id) => ui.querySelector('#' + id);
   const api = {
@@ -219,7 +221,7 @@ export function makeUI(theme) {
     toast(s, ms = 2800) { const q = api._tq || (api._tq = []); if (q.length && q[q.length - 1][0] === s) return; q.push([s, ms]); if (q.length > 3) q.splice(1, q.length - 3); if (!api._tb) api._tnext(); },
     _tnext() { const e = $('kg-toast'), q = api._tq; if (!q.length) { api._tb = false; e.style.opacity = 0; return; } api._tb = true; const [s, ms] = q.shift(); e.textContent = s; api._tpos(); e.style.opacity = 1; clearTimeout(api._tt); api._tt = setTimeout(() => { e.style.opacity = 0; setTimeout(api._tnext, 380); }, q.length ? Math.min(ms, 2200) : ms); },
     _tpos() { const e = $('kg-toast'), a = ui.querySelector('.kg-acts'); if (!a) return; const r = a.getBoundingClientRect(), safe = 120; const w = Math.min(innerWidth * 0.9, 460); const leftFree = r.left - 16; if (leftFree >= Math.min(w, 300) + 16 && innerWidth >= 700) { e.style.left = (8 + leftFree / 2) + 'px'; e.style.maxWidth = (leftFree - 8) + 'px'; e.style.bottom = `calc(${safe}px + env(safe-area-inset-bottom))`; } else { e.style.left = '50%'; e.style.maxWidth = '90vw'; const b = Math.max(innerHeight - r.top + 12, safe); e.style.bottom = `calc(${b}px + env(safe-area-inset-bottom))`; } },
-    feed(s) { const f = $('kg-feed'), d = document.createElement('div'); d.textContent = s; f.appendChild(d); setTimeout(() => d.remove(), 7000); while (f.children.length > 4) f.firstChild.remove(); },
+    feed(s) { if (LIVE) return; const f = $('kg-feed'), d = document.createElement('div'); d.textContent = s; f.appendChild(d); setTimeout(() => d.remove(), 7000); while (f.children.length > 4) f.firstChild.remove(); },
     modal(html, onMount) { $('kg-card').innerHTML = '<button class="kg-close" aria-label="Đóng" title="Đóng (Esc)">×</button>' + html; $('kg-card').querySelector('.kg-close').onclick = () => api.close(); $('kg-modal').style.display = 'flex'; onMount && onMount($('kg-card')); },
     close() { $('kg-modal').style.display = 'none'; },
     button(parent, text, fn, main) { const b = document.createElement('button'); b.className = 'kg-btn pe' + (main ? ' main' : ''); b.innerHTML = text; b.onclick = (e) => { e.stopPropagation(); fn(b); }; $(parent).appendChild(b); return b; },
@@ -289,7 +291,7 @@ export function createWorld(cfg) {
     // movement
     let ix = 0, iy = 0;
     if (keys.KeyW || keys.ArrowUp) iy -= 1; if (keys.KeyS || keys.ArrowDown) iy += 1; if (keys.KeyA || keys.ArrowLeft) ix -= 1; if (keys.KeyD || keys.ArrowRight) ix += 1;
-    ix += joy.x; iy += joy.y; if (W.input.auto) { ix += W.input.auto.x; iy += W.input.auto.y; if (W.input.auto.turn) P.camYaw += W.input.auto.turn * dt; }
+    ix += joy.x; iy += joy.y; if (W.input.auto && !LIVE) { ix += W.input.auto.x; iy += W.input.auto.y; if (W.input.auto.turn) P.camYaw += W.input.auto.turn * dt; }
     const il = Math.min(1, Math.hypot(ix, iy));
     if (P.av && !W.frozen && !P.riding) {
       if (il > 0.1 && P.av.seated) standUp();
@@ -329,7 +331,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=11', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=12', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -390,7 +392,7 @@ export function mapView(W, ui, areas, title = 'Bản đồ') {
     card.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const a = areas[+b.dataset.i]; ui.close(); ui.fade(() => { W.player.riding = null; W.teleport(a.pos[0], a.pos[1], a.yaw); a.onArrive?.(); }); });
   });
 }
-export function shareInvite(ui, { name, text, place }) {
+export function shareInvite(ui, { name, text, place }) { if (LIVE) return;
   const u = new URL(location.href); u.search = ''; u.searchParams.set('ref', name || 'ban'); if (place) u.searchParams.set('o', place); const url = u.toString();
   text = `${text} · Dưới Gốc Thị – Bầu trời dưới gốc cây thị`; const msg = `${text} ${url}`;
   if (navigator.share) navigator.share({ title: document.title, text, url }).catch(() => { });
@@ -400,7 +402,7 @@ export function shareInvite(ui, { name, text, place }) {
 }
 /* bỏ link, số điện thoại, ký tự lạ; tối đa 20 ký tự */
 export function cleanName(t = '') { return String(t).replace(/https?:\/\/\S+|www\.\S+|\S+\.(com|vn|net|org|me|ly|io)\S*/gi, '').replace(/[+\d][\d .\-]{6,}\d/g, '').replace(/[<>"'`&\\{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
-export function refGreeting(ui, fmt) { const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => { const c = cleanName(r); if (c) ui.toast(fmt(c), 5000); }, 1500); }
+export function refGreeting(ui, fmt) { if (LIVE) return; const r = new URLSearchParams(location.search).get('ref'); if (r) setTimeout(() => { const c = cleanName(r); if (c) ui.toast(fmt(c), 5000); }, 1500); }
 export function leafPatch(W, { center, radius, count = 50, colors = ['#b5803a', '#8f6a2c', '#c99a4a', '#7b5a28'], onDone, sound }) {
   const g = new THREE.PlaneGeometry(0.22, 0.12); const leaves = [];
   const im = new THREE.InstancedMesh(g, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.9 }), count); im.receiveShadow = true;
@@ -436,6 +438,6 @@ export function stats(ui, id) { const k = 'kg_stats_' + id; let s = {}; try { s 
 
 /* ---------------- Bè Gỗ link ---------------- */
 export const BEGO_URL = 'https://facebook.com/begotrensong';
-export function begoButton(text = 'Ghé Bè Gỗ Trên Sông') { return `<a class="kg-bego" href="${BEGO_URL}" target="_blank" rel="noopener">🪵 ${text} ↗</a>`; }
+export function begoButton(text = 'Ghé Bè Gỗ Trên Sông') { if (LIVE) return ''; return `<a class="kg-bego" href="${BEGO_URL}" target="_blank" rel="noopener">🪵 ${text} ↗</a>`; }
 export function doneCard(ui, { title = 'Hoàn thành', msg = '', icon = '🌸' }) { ui.modal(`<h2>${icon} ${title}</h2><p style="text-align:center">${msg}</p>${begoButton()}<button class="kg-btn" style="width:100%;margin-top:8px" onclick="this.closest('.kg-modal').style.display='none'">Tiếp tục</button>`); }
 export const MOVE_TUT = isMobile ? [['👈', 'Đặt ngón tay bên <b>trái</b> màn hình và kéo để đi'], ['👉', 'Vuốt bên <b>phải</b> màn hình để xoay nhìn'], ['👆', 'Chạm nút lớn phía dưới để tương tác']] : [['⌨️', 'Phím <b>W A S D</b> hoặc mũi tên để đi'], ['🖱️', 'Kéo chuột để xoay nhìn, lăn chuột để xa/gần'], ['E', 'Phím <b>E</b> để tương tác · <b>Esc</b> để đóng hộp thoại']];
