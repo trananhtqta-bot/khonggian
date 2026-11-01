@@ -1,4 +1,4 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, MOVE_TUT } from '../shared/engine.js?v=5';
 
 const walkable = (x, z) => Math.abs(x) < 22 && z > -56 && z < 46;
 const W = createWorld({ fog: ['#5d5568', 18, 95], sky: ['#2c3656', '#d79a72', '#ffb27a'], hemi: ['#f0e2dc', '#5a5a64', 1.45], sun: ['#ffb27a', 1.6], sunDir: [-30, 12, -25], spawn: [0, 0, 42], spawnYaw: Math.PI, saveKey: 'trian', heightAt: (x, z) => (Math.abs(x) < 4.5 && z > -3 && z < 3) ? 0.6 : 0, walkable, meColor: '#f5e6c8', exposure: 1.05 });
@@ -35,7 +35,13 @@ const graves = []; { for (let z = -6; z >= -46; z -= 3.2) for (let x of [-18, -1
   const label3 = (t, x, z) => { const l = label(t, '#3a2a20', 0.13); l.position.set(x, 0.55, z - 0.8); }; }
 // pines + low hedges
 { const N = 60, cone = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 3.2, 7), new THREE.MeshStandardMaterial({ color: '#2f4a34', flatShading: true }), N), tr = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.16, 1.2, 5), mat('#4a3626'), N); const m4 = new THREE.Matrix4(); let i = 0;
-  for (let z = 40; z > -54 && i < N; z -= 5) for (const x of [-3.2, 3.2, -21.5, 21.5]) { if (i >= N) break; if (Math.abs(x) < 4 && z > -4 && z < 4) continue; const s = rnd(0.9, 1.25); m4.makeScale(s, s, s).setPosition(x, 2.6 * s, z); cone.setMatrixAt(i, m4); m4.makeTranslation(x, 0.6, z); tr.setMatrixAt(i, m4); W.addCollider(x, z, 0.5); i++; } cone.count = tr.count = i; cone.castShadow = true; W.scene.add(cone, tr); }
+  for (let z = 40; z > -54 && i < N; z -= 5) for (const x of [-3.2, 3.2, -21.5, 21.5]) { if (i >= N) break; if (Math.abs(x) < 4 && z > -4 && z < 4) continue; const s = rnd(0.9, 1.25); m4.makeScale(s, s, s).setPosition(x, 2.6 * s, z); cone.setMatrixAt(i, m4); m4.makeTranslation(x, 0.6, z); tr.setMatrixAt(i, m4); W.addCollider(x, z, 0.5); i++; } cone.count = tr.count = i; cone.castShadow = true; W.scene.add(cone, tr);
+  const TP = []; { let k = 0; const mm = new THREE.Matrix4(); for (; k < i; k++) { cone.getMatrixAt(k, mm); const m1 = mm.clone(); tr.getMatrixAt(k, mm); TP.push({ x: m1.elements[12], z: m1.elements[14], mc: m1, mt: mm.clone(), hid: false }); } }
+  const Z = new THREE.Matrix4().makeScale(0, 0, 0);
+  W.camFade = (c, t) => { const dx = t.x - c.x, dz = t.z - c.z, L2 = dx * dx + dz * dz || 1; let ch = false;
+    for (let k = 0; k < TP.length; k++) { const p = TP[k]; let u = ((p.x - c.x) * dx + (p.z - c.z) * dz) / L2; const block = u > -0.15 && u < 0.97 && Math.hypot(c.x + dx * u - p.x, c.z + dz * u - p.z) < 1.5;
+      if (block !== p.hid) { p.hid = block; cone.setMatrixAt(k, block ? Z : p.mc); tr.setMatrixAt(k, block ? Z : p.mt); ch = true; } }
+    if (ch) { cone.instanceMatrix.needsUpdate = tr.instanceMatrix.needsUpdate = true; cone.computeBoundingSphere(); } }; }
 // memorial wall (tường tri ân)
 const WALL = { x: 0, z: -51 }; const wallC = document.createElement('canvas'); wallC.width = 1024; wallC.height = 512; const wallT = new THREE.CanvasTexture(wallC); wallT.colorSpace = THREE.SRGBColorSpace;
 { const w = mesh(new THREE.BoxGeometry(14, 3.4, 0.6), '#8f8676'); w.position.set(WALL.x, 1.7, WALL.z - 0.4); W.scene.add(w); const f = new THREE.Mesh(new THREE.PlaneGeometry(13, 3.0), new THREE.MeshStandardMaterial({ map: wallT, roughness: 0.6 })); f.position.set(WALL.x, 1.7, WALL.z - 0.09); W.scene.add(f); W.addBox(WALL.x, WALL.z - 0.4, 7, 0.4); }
@@ -96,8 +102,10 @@ function startMusic() { S.init(); S.music({ scale: [0, 3, 5, 7, 10], root: 196, 
 let amb = false; W.onFirstInput = () => { if (amb) return; amb = true; S.init(); S.ambient('wind', 0.12); startMusic(); };
 W.start(); document.getElementById('load').style.opacity = 0; setTimeout(() => document.getElementById('load').remove(), 900);
 refGreeting(ui, r => `${r} mời bạn cùng thắp hương tri ân`);
+const _ex = W.renderer.toneMappingExposure, _hi = W.hemi.intensity; W.renderer.toneMappingExposure = _ex * 1.6; W.hemi.intensity = _hi * 1.7; const _pl = new THREE.PointLight('#fff2dc', 6, 8, 1.5); _pl.position.set(W.player.pos.x, 2.2, W.player.pos.z - 2.2); W.scene.add(_pl);
 await avatarCreator(W, ui, { key: 'kg_av_trian', title: 'Trang phục viếng', outfits: [{ id: 'trang', label: 'Sơ mi trắng, quần sẫm', ap: { top: '#f4f1ea', bottom: '#24242a', style: 'ao', adult: true } }, { id: 'den', label: 'Trang phục sẫm màu', ap: { top: '#26262c', bottom: '#26262c', style: 'ao', adult: true } }, { id: 'aodai', label: 'Áo dài trắng', ap: { top: '#f4f1ea', bottom: '#f4f1ea', style: 'aodai', adult: true } }, { id: 'aodaiden', label: 'Áo dài đen', ap: { top: '#1f1f24', bottom: '#1f1f24', style: 'aodai', adult: true } }, { id: 'quandoi', label: 'Quân phục cựu chiến binh', ap: { top: '#5a6a3a', bottom: '#5a6a3a', style: 'quandoi', adult: true } }],
   hats: { none: 'Không', nonla: 'Nón lá' }, hairs: { ngan: 'Tóc ngắn', bui: 'Tóc búi', dai: 'Tóc dài' }, goLabel: 'Vào viếng' });
+W.renderer.toneMappingExposure = _ex; W.hemi.intensity = _hi; W.scene.remove(_pl);
 if (!amb) W.onFirstInput();
 W.restorePos(); ui.tutorial('move', MOVE_TUT);
 window.__W = W;

@@ -1,4 +1,4 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT } from '../shared/engine.js?v=5';
 
 // ---------- terrain ----------
 const riverX = z => 6 * Math.sin(z * 0.035) + 2 * Math.sin(z * 0.11);
@@ -15,7 +15,7 @@ const karstCols = [];
 const walkable = (x, z) => ground(x, z) > -0.02 && Math.abs(x) < 26 && z < 74 && z > -103 && !karstCols.some(k => Math.hypot(x - k[0], z - k[1]) < k[2]);
 const W = createWorld({ fog: ['#c9d6cf', 25, 150], sky: ['#9fc3d6', '#e9eadf', '#fff4dc'], hemi: ['#f4f1e4', '#5d7a52', 1.2], sun: ['#fff1d6', 2.4], sunDir: [-25, 35, 15], spawn: [12, 0, 62], spawnYaw: Math.PI, saveKey: 'huong', heightAt: (x, z) => Math.max(0, ground(x, z)), walkable, meColor: '#ffd36b' });
 const S = W.sound = new Sound();
-const ui = W.ui = makeUI({ title: 'Đò về Hương Sơn', sub: 'Trẩy hội non nước · <span id="online">…</span>', accent: '#9c3420', panel: '#fbf5e8d9', panelSolid: '#fbf5e8', glow: '#f2c46a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
+const ui = W.ui = makeUI({ title: 'Đò về Hương Sơn', sub: 'Trẩy hội non nước', accent: '#9c3420', panel: '#fbf5e8d9', panelSolid: '#fbf5e8', glow: '#f2c46a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
 const ST = stats(ui, 'huong');
 
 { // terrain mesh
@@ -58,7 +58,7 @@ function makeBoat() { const g = new THREE.Group(); const hull = new THREE.Shape(
   const hg = new THREE.ExtrudeGeometry(hull, { depth: 4.2, bevelEnabled: false }); hg.translate(0, 0.25, -2.1); const hp = hg.attributes.position; for (let i = 0; i < hp.count; i++) { const z = hp.getZ(i), k = 1 - Math.pow(Math.abs(z) / 2.1, 3) * 0.7; hp.setX(i, hp.getX(i) * k); hp.setY(i, hp.getY(i) + Math.pow(Math.abs(z) / 2.1, 2) * 0.25); } hg.computeVertexNormals();
   g.add(mesh(hg, '#6a4426', { roughness: 0.7 })); for (let z of [-1.2, 0, 1.2]) { const b = mesh(new THREE.BoxGeometry(0.9, 0.05, 0.25), '#8a5a33'); b.position.set(0, 0.2, z); g.add(b); } return g; }
 function makeRower(ap) { return makeNPCav({ skin: '#d9a77c', hair: 'bui', top: '#4a3b6b', bottom: '#2b2b33', style: 'ao', hat: 'nonla', ...ap }); }
-import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js';
+import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=5';
 function makeNPCav(ap) { return makeAvatar(ap); }
 const NAMES = ['Bà Tư', 'Cô Hạnh', 'Anh Tuấn', 'Chị Thảo', 'Bé Na', 'Chú Ba', 'Minh', 'Ngọc', 'Bác Lộc', 'Linh', 'Hùng', 'Cô Năm', 'Phúc', 'Vy', 'Trang', 'Long'];
 const OUTF = [{ top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' }, { top: '#8a6a4a', bottom: '#5a4632', style: 'aodai' }, { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' }, { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' }, { top: '#3e5b4a', bottom: '#2b2b2b', style: 'ao' }, { top: '#d9c38a', bottom: '#3a3a3a', style: 'ao' }];
@@ -219,7 +219,7 @@ const doBtn = ui.button('kg-acts', '🛶 Lên đò', () => { const P = W.player;
 doBtn.style.fontSize = '18px'; W.onUpdate(() => { const t = W.player.riding ? '' : (W.player.pos.z > 0 ? '🛶 Lên đò đi chùa' : '🛶 Đò về Bến Đục'); doBtn.style.display = t ? '' : 'none'; if (t && doBtn.textContent !== t) doBtn.textContent = t; });
 ui.button('kg-acts', '🙏 Lạy', () => { bow(W.player.av); S.mo(); ST.add('lay'); });
 ui.button('kg-acts', '📿 Tràng hạt', () => beadsView(ui, { mantra: 'Nam mô A Di Đà Phật', sound: S, onRound: () => doneCard(ui, { icon: '📿', title: 'Tròn một chuỗi 108 hạt', msg: 'Nam mô A Di Đà Phật. Tâm an, đường đi nhẹ.' }) }));
-ui.button('kg-acts', '📜 Tụng kinh', () => { reader(ui, { title: 'Bát Nhã Tâm Kinh', sub: 'Bản Hán Việt (lược) · mỗi câu một tiếng mõ', lines: KINH, beat: 2.6, onLine: () => { S.mo(); if (W.player.av) W.player.av.pray = true; }, onEnd: () => { S.bell(110, 0.3); W.player.av.pray = false; setTimeout(() => doneCard(ui, { icon: '📜', title: 'Viên mãn thời kinh', msg: 'Hồi hướng công đức cho muôn loài.' }), 400); } }); });
+ui.button('kg-acts', '📜 Tụng kinh', () => { reader(ui, { title: 'Bát Nhã Tâm Kinh', sub: 'Bản Hán Việt (lược) · mỗi câu một tiếng mõ', lines: KINH, beat: 2.6, onLine: () => { S.mo(); if (W.player.av) W.player.av.pray = true; }, onEnd: () => { S.bell(110, 0.3); W.player.av.pray = false; setTimeout(() => { doneCard(ui, { icon: '📜', title: 'Viên mãn thời kinh', msg: 'Hồi hướng công đức cho muôn loài.' }); setTimeout(() => { const c = ui.$('kg-card'); if (c && !c.querySelector('.kg-bego')) c.insertAdjacentHTML('beforeend', begoButton()); }, 50); }, 400); } }); });
 const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
 icons('🗺️', 'Bản đồ', () => mapView(W, ui, [{ label: 'Bến Đục', desc: 'Nơi xuống đò bắt đầu trẩy hội', icon: '🛶', pos: [DOCK1.x + 2, DOCK1.z], yaw: Math.PI }, { label: 'Bến Trò', desc: 'Bờ suối thả hoa đăng', icon: '🪷', pos: [DOCK2.x + 2, DOCK2.z + 1], yaw: Math.PI }, { label: 'Sân chùa', desc: 'Lư hương, gác chuông, cây lộc', icon: '🛕', pos: [PAG.x, -76], yaw: Math.PI }, { label: 'Chánh điện', desc: 'Ngồi bồ đoàn, lạy Phật, tụng kinh', icon: '🧘', pos: [PAG.x, -91.5], yaw: Math.PI }, { label: 'Động Hương Tích', desc: 'Hang đá thắp nến', icon: '⛰️', pos: [CAVE.x + 1, CAVE.z + 3.5], yaw: Math.PI }], 'Bản đồ Hương Sơn'));
 icons('📊', 'Hành trình', () => { const s = ST.s; ui.modal(`<h2>Hành hương của bạn</h2><div style="font-size:15px;line-height:2">🛶 Đi đò: <b>${s.do || 0}</b><br>🪔 Thắp hương: <b>${s.huong || 0}</b><br>🔔 Thỉnh chuông: <b>${s.chuong || 0}</b><br>🧧 Xin lộc: <b>${s.loc || 0}</b><br>🪷 Hoa đăng: <b>${s.hoadang || 0}</b><br>🧹 Quét sân: <b>${s.quet || 0}</b><br>🙏 Lạy: <b>${s.lay || 0}</b></div>`); });
@@ -229,8 +229,6 @@ icons('🔊', 'Âm thanh', (b) => { if (S.musicOn) { S.stopMusic(); b.firstChild
 function startMusic() { S.init(); S.music({ scale: [0, 2, 5, 7, 9], root: 293.66, beat: 0.7, inst: 'flute', gong: 24, rest: 0.4 }); }
 
 // simulated shared presence
-const online = () => { const e = document.getElementById('online'); if (e) e.textContent = `${180 + (Math.random() * 40 | 0)} người đang trẩy hội`; }; online(); setInterval(online, 8000);
-setInterval(() => { const n = pick(NAMES); const a = pick([`${n} vừa thắp hương`, `${n} vừa thả hoa đăng 🪷`, `${n} xin được lộc Bình an`, `${n} thỉnh một tiếng chuông`, `${n} vừa lên đò ở Bến Đục`]); ui.feed(a); if (/hoa đăng/.test(a)) floatLantern(riverX(-58) + rnd(-2, 2), -58, n); if (/chuông/.test(a)) S.bell(98, 0.12); }, 9000);
 for (let i = 0; i < 4; i++) floatLantern(riverX(-50 + i * 12) + rnd(-2, 2), -50 + i * 12, pick(NAMES));
 
 // ---------- start ----------

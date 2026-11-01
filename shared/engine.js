@@ -1,5 +1,5 @@
 // Khong Gian Viet - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js';
+import * as THREE from './three.module.min.js?v=5';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -176,8 +176,8 @@ const CSS = `
 .kg-joy{position:absolute;width:120px;height:120px;border-radius:50%;background:#ffffff26;border:2px solid #ffffff66;display:none;transform:translate(-50%,-50%)}
 .kg-joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px #0004}
 .kg-hint{position:absolute;left:10px;bottom:max(14px,env(safe-area-inset-bottom));font-size:14px;color:#fff;text-shadow:0 1px 3px #000;max-width:38vw;opacity:.85}
-.kg-toast{position:absolute;top:96px;left:50%;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
-.kg-feed{position:absolute;left:8px;top:74px;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
+.kg-toast{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom));left:50%;z-index:12;pointer-events:none;transform:translateX(-50%);background:var(--panel);padding:10px 16px;border-radius:14px;font-size:16px;box-shadow:0 4px 18px #0003;opacity:0;transition:opacity .4s;max-width:90vw;text-align:center}
+.kg-feed{position:absolute;left:8px;top:calc(118px + env(safe-area-inset-top));pointer-events:none;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;max-width:58vw;display:flex;flex-direction:column;gap:3px}
 .kg-feed div{animation:kgf 7s forwards}@keyframes kgf{0%{opacity:0;transform:translateX(-10px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 .kg-modal{position:absolute;inset:0;background:#0007;display:none;align-items:center;justify-content:center;pointer-events:auto;z-index:20}
 .kg-card{width:min(92vw,420px);max-height:84vh;overflow:auto;background:var(--panelSolid);border-radius:18px;padding:18px;box-shadow:0 20px 60px #0008;animation:kgpop .35s}
@@ -218,7 +218,9 @@ export function makeUI(theme) {
   const $ = (id) => ui.querySelector('#' + id);
   const api = {
     root: ui, $,
-    toast(s, ms = 2800) { const e = $('kg-toast'); e.textContent = s; e.style.opacity = 1; clearTimeout(api._tt); api._tt = setTimeout(() => e.style.opacity = 0, ms); },
+    toast(s, ms = 2800) { const q = api._tq || (api._tq = []); if (q.length && q[q.length - 1][0] === s) return; q.push([s, ms]); if (q.length > 3) q.splice(1, q.length - 3); if (!api._tb) api._tnext(); },
+    _tnext() { const e = $('kg-toast'), q = api._tq; if (!q.length) { api._tb = false; e.style.opacity = 0; return; } api._tb = true; const [s, ms] = q.shift(); e.textContent = s; api._tpos(); e.style.opacity = 1; clearTimeout(api._tt); api._tt = setTimeout(() => { e.style.opacity = 0; setTimeout(api._tnext, 380); }, q.length ? Math.min(ms, 2200) : ms); },
+    _tpos() { const e = $('kg-toast'), a = ui.querySelector('.kg-acts'); if (!a) return; const r = a.getBoundingClientRect(), safe = 120; const w = Math.min(innerWidth * 0.9, 460); const leftFree = r.left - 16; if (leftFree >= Math.min(w, 300) + 16 && innerWidth >= 700) { e.style.left = (8 + leftFree / 2) + 'px'; e.style.maxWidth = (leftFree - 8) + 'px'; e.style.bottom = `calc(${safe}px + env(safe-area-inset-bottom))`; } else { e.style.left = '50%'; e.style.maxWidth = '90vw'; const b = Math.max(innerHeight - r.top + 12, safe); e.style.bottom = `calc(${b}px + env(safe-area-inset-bottom))`; } },
     feed(s) { const f = $('kg-feed'), d = document.createElement('div'); d.textContent = s; f.appendChild(d); setTimeout(() => d.remove(), 7000); while (f.children.length > 4) f.firstChild.remove(); },
     modal(html, onMount) { $('kg-card').innerHTML = '<button class="kg-close" aria-label="Đóng" title="Đóng (Esc)">×</button>' + html; $('kg-card').querySelector('.kg-close').onclick = () => api.close(); $('kg-modal').style.display = 'flex'; onMount && onMount($('kg-card')); },
     close() { $('kg-modal').style.display = 'none'; },
@@ -319,14 +321,16 @@ export function createWorld(cfg) {
     if (W.occluders.length) { rcDir.subVectors(camP, camT); const L = rcDir.length(); rcDir.normalize(); ray.set(camT, rcDir); ray.far = L;
       const hit = ray.intersectObjects(W.occluders, true).find(h => h.object.visible && h.object.material && !(h.object.material.transparent && h.object.material.opacity < 0.5) && !h.object.userData.noOcc);
       if (hit) camP.copy(camT).addScaledVector(rcDir, Math.max(0.6, hit.distance - 0.35)); }
+    if (W.camFade) W.camFade(camera.position, camT);
     if (first) { camera.position.copy(camP); first = false; } else camera.position.lerp(camP, Math.min(1, dt * 8));
     camera.lookAt(camT);
+    for (const n of W.npcs) { const r = n.root || n.av?.root; if (r) r.visible = r.position.distanceTo(camera.position) > 0.9 || (Math.abs(r.position.y + 1 - camera.position.y) > 1.6); }
     sun.position.set(P.pos.x + (cfg.sunDir || [20, 30, 10])[0], (cfg.sunDir || [20, 30, 10])[1], P.pos.z + (cfg.sunDir || [20, 30, 10])[2]); sun.target.position.copy(P.pos);
     renderer.render(scene, camera); requestAnimationFrame(step);
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=5', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;

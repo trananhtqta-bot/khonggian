@@ -1,4 +1,4 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=5';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
