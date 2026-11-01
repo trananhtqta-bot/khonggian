@@ -65,11 +65,13 @@ function handle_(e) {
   } finally { lock.releaseLock(); } }
 
 /** Xoá các dòng không cập nhật trong 12 tháng. Chạy bằng trigger hằng ngày (setup() tạo sẵn). */
-function purgeOld() {
+function purgeOld() { // xoá theo lô: đọc hết, lọc, ghi lại một lần (không deleteRow từng dòng)
   const lock = LockService.getScriptLock(); if (!lock.tryLock(30000)) return;
   try { const sh = sheet_(), last = sh.getLastRow(); if (last < 2) return; const cut = Date.now() - RETAIN_MS;
-    const vals = sh.getRange(2, 3, last - 1, 1).getValues();
-    for (let i = vals.length - 1; i >= 0; i--) if ((Number(vals[i][0]) || 0) < cut) sh.deleteRow(i + 2);
+    const rng = sh.getRange(2, 1, last - 1, 3), vals = rng.getValues();
+    const keep = vals.filter(r => (Number(r[2]) || 0) >= cut); if (keep.length === vals.length) return;
+    rng.clearContent(); if (keep.length) sh.getRange(2, 1, keep.length, 3).setValues(keep);
+    const extra = sh.getMaxRows() - Math.max(keep.length + 1, 2); if (extra > 0) sh.deleteRows(Math.max(keep.length + 1, 2) + 1, extra);
   } finally { lock.releaseLock(); } }
 
 /** Chạy MỘT LẦN trong trình soạn thảo: tạo pepper (nếu chưa có), định dạng cột Plain text, tạo trigger dọn dữ liệu hằng ngày. */

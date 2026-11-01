@@ -5,7 +5,7 @@ export const SCHEMA_VERSION = 1;
 const PK = 'kg_profile', CK = 'kg_house_code', MAX = 20000;
 const ALPHA = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // 31 ký tự, bỏ 0 O 1 I L
 const CODE_RE = /^THI-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
-export const SKILLS = { chamcay: 'Chăm cây', hanhhuong: 'Hành hương', hoctro: 'Học trò', ansang: 'Ăn sáng', cafe: 'Cà phê', hoc: 'Học', thethao: 'Thể thao', nauan: 'Nấu ăn' };
+export const SKILLS = { chamcay: 'Chăm cây', daocanh: 'Dạo cảnh', hoctro: 'Học trò', ansang: 'Ăn sáng', cafe: 'Cà phê', hoc: 'Học', thethao: 'Thể thao', nauan: 'Nấu ăn' };
 export const SHOP = [
   { id: 'chauhoa', label: 'Chậu hoa', icon: '🪴', cost: 3 },
   { id: 'denlong', label: 'Đèn lồng', icon: '🏮', cost: 5 },
@@ -32,7 +32,7 @@ const color = (v, d) => (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) ? v
 const ident = v => typeof v === 'string' && /^[a-z0-9_-]{1,24}$/i.test(v);
 const HAIRS = ['ngan', 'dai', 'buoi', 'troc'];
 function sanitizeProfile(p) { const b = blank(), c = p.character || {}, a = c.appearance || {}, h = p.house || {};
-  const skills = {}; if (c.skills && typeof c.skills === 'object') for (const [k, v] of Object.entries(c.skills)) if (SKILLS[k]) skills[k] = num(v);
+  const skills = {}; if (c.skills && typeof c.skills === 'object') for (const [k, v] of Object.entries(c.skills)) { const kk = k === 'hanhhuong' ? 'daocanh' : k; if (SKILLS[kk]) skills[kk] = num((skills[kk] || 0) + num(v)); } // v18: 'Hành hương' → 'Dạo cảnh'
   const ups = Array.isArray(h.upgrades) ? h.upgrades.filter(u => UPGRADES.some(x => x.id === u)) : []; if (!ups.includes('tranh')) ups.unshift('tranh');
   const games = {}; if (p.games && typeof p.games === 'object') for (const [k, v] of Object.entries(p.games).slice(0, 50)) if (ident(k) && v && typeof v === 'object') games[k] = { plays: num(v.plays), last: num(v.last, 1e14) };
   const xp = num(c.xp);
@@ -99,4 +99,4 @@ export const touch = () => { try { const p = getProfile(); saveProfile(p); } cat
 // xoá nhà: xoá bản trên máy chủ + toàn bộ tiến trình trên máy này, tạo mã mới
 export async function deleteHouse() { const code = getCode(); clearTimeout(timer); const j = (SYNC_URL || globalThis.KG_SYNC_URL) ? await call({ op: 'del', code }) : { ok: true };
   if (!j || !j.ok) return { ok: false, err: 'Không kết nối được máy chủ, chưa xoá. Thử lại sau nhé' };
-  for (const k of Object.keys(localStorage)) if (k.startsWith('kg_') && !k.startsWith('kg_live')) localStorage.removeItem(k); return { ok: true }; }
+  for (const k of Object.keys(localStorage)) if (k.startsWith('kg_') && !k.startsWith('kg_live')) localStorage.removeItem(k); localStorage.removeItem('trian_msgs'); return { ok: true }; }

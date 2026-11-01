@@ -1,6 +1,6 @@
 // Hub: tạo nhân vật, thẻ nhân vật, nhà riêng, mã nhà
-import { load as loadDaily, doneToday } from './daily.js?v=17';
-import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=17';
+import { load as loadDaily, doneToday } from './daily.js?v=18';
+import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=18';
 const LIVE = !!window.KG_LIVE;
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -8,7 +8,7 @@ const SK = ['#f6d7b5', '#eec39a', '#d9a77c', '#b98260', '#8d5a3b'], HAIR = { nga
 const card = 'max-width:380px;margin:14px auto;background:#24382f;border-radius:16px;padding:14px 16px;text-align:left;box-sizing:border-box';
 const btn = 'border:0;border-radius:12px;background:#c79a3b;color:#1b1206;font-weight:bold;font-size:18px;min-height:48px;padding:10px 14px;cursor:pointer';
 const lockedBtn = 'border:2px dashed #8fa89a;border-radius:12px;background:#1f3029;color:#f3ead7;font-weight:bold;font-size:18px;min-height:48px;padding:8px 12px;cursor:pointer;text-align:left';
-const TASKS = { huong: 3, mg: 2 }; // Tri Ân không có lá thị
+const TASKS = { huong: 2, mg: 2 }; const TASK_IDS = { huong: ['do', 'quet'], mg: null }; // Hương Sơn: thắp hương, thỉnh chuông không tính // Tri Ân không có lá thị
 const stars = lv => '★'.repeat(Math.min(lv, 5)) + (lv > 5 ? ' +' + (lv - 5) : '');
 function person(a, s = 64) { return `<svg width="${s}" height="${s * 1.25}" viewBox="0 0 64 80" aria-hidden="true"><rect x="18" y="40" width="28" height="26" rx="8" fill="${a.top}"/><rect x="21" y="64" width="9" height="14" rx="3" fill="${a.bottom}"/><rect x="34" y="64" width="9" height="14" rx="3" fill="${a.bottom}"/><circle cx="32" cy="24" r="15" fill="${a.skin}"/>${a.hair === 'troc' ? '' : `<path d="M17 22 Q32 2 47 22 Q40 14 32 14 Q24 14 17 22Z" fill="#2a1d14"/>`}${a.hair === 'dai' ? '<rect x="15" y="20" width="6" height="22" rx="3" fill="#2a1d14"/><rect x="43" y="20" width="6" height="22" rx="3" fill="#2a1d14"/>' : ''}${a.hair === 'buoi' ? '<circle cx="32" cy="7" r="5" fill="#2a1d14"/>' : ''}<circle cx="27" cy="25" r="1.8" fill="#222"/><circle cx="37" cy="25" r="1.8" fill="#222"/><path d="M28 31 Q32 34 36 31" stroke="#a0522d" stroke-width="1.6" fill="none"/></svg>`; }
 function creator(done) {
@@ -40,7 +40,7 @@ function shopBtn(attr, icon, label, cost, la, extraStyle = '') { const miss = co
 let codeOpen = false;
 function render() {
   const p = getProfile(), c = p.character, lv = levelOf(c.xp), lo = 20 * (lv - 1) ** 2, hi = 20 * lv ** 2, pct = Math.round(100 * (c.xp - lo) / (hi - lo));
-  const ds = loadDaily(), left = Object.entries(TASKS).reduce((n, [pg, t]) => n + Math.max(0, t - doneToday(pg, ds).length), 0);
+  const ds = loadDaily(), left = Object.entries(TASKS).reduce((n, [pg, t]) => n + Math.max(0, t - doneToday(pg, ds).filter(id => !TASK_IDS[pg] || TASK_IDS[pg].includes(id)).length), 0);
   const skills = Object.entries(c.skills).filter(([, v]) => v > 0).map(([k, v]) => `<span style="display:inline-block;background:#2f4a3e;border-radius:10px;padding:2px 8px;margin:2px;font-size:15px">${SKILLS[k] || esc(k)} · ${v}</span>`).join('');
   $('#me').innerHTML = `<div style="${card};display:flex;gap:12px;align-items:center"><div>${person(c.appearance, 60)}</div><div style="flex:1"><b id="kgname" style="font-size:19px"></b>
    <div style="font-size:17px;margin-top:2px">Chăm chỉ <span style="color:#f2c46a;letter-spacing:1px" aria-label="Chăm chỉ ${lv} sao">${stars(lv)}</span></div>

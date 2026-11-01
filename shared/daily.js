@@ -1,4 +1,4 @@
-import { addProgress, touch } from './profile.js?v=17';
+import { addProgress, touch } from './profile.js?v=18';
 /* Chuỗi ngày + việc nhỏ mỗi ngày — chỉ lưu trên máy (localStorage), không số ảo */
 const K = 'kg_daily';
 export const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -30,7 +30,7 @@ export function dailyTasks({ ui, ST, page, tasks, icons, solemn = false, chime }
   const n = () => doneToday(page).filter(id => tasks.some(t => t.id === id)).length;
   const label = () => solemn ? `<span>📋</span><small>Việc tri ân</small>` : `<span>📋</span><small>Hôm nay ${n()}/${tasks.length}</small>`;
   const refresh = () => { if (btn) btn.innerHTML = label(); };
-  ST.add = (k, v) => { const r = add0(k, v); const t = tasks.find(t => t.keys.includes(k)); if (t) { const m = mark(page, t.id); if (m.fresh) { refresh(); try { if (solemn) touch(); else addProgress('daily-' + page, { xp: 10, skill: page === 'huong' ? 'hanhhuong' : page === 'mg' ? 'hoctro' : 'chamcay', la: 1 }); } catch { } const all = n() === tasks.length;
+  ST.add = (k, v) => { const r = add0(k, v); const t = tasks.find(t => t.keys.includes(k)); if (t) { const m = mark(page, t.id); if (m.fresh) { refresh(); try { if (solemn) touch(); else addProgress('daily-' + page, { xp: 10, skill: page === 'huong' ? 'daocanh' : page === 'mg' ? 'hoctro' : 'chamcay', la: 1 }); } catch { } const all = n() === tasks.length;
         const msg = solemn ? (all ? 'Xin cảm ơn bạn đã đến viếng' : (t.doneMsg || 'Xin cảm ơn bạn')) : (all ? 'Hôm nay bạn đã trọn một ngày an lành · cây thị đã được chăm 🌱' : `✔ Đã xong: ${t.text}`);
         setTimeout(() => (all && !solemn) ? allDoneCard() : ui.toast(msg, 3500), 600); if (!solemn && chime) chime(); } } return r; };
   const open = () => { const done = doneToday(page), st = streakNow();

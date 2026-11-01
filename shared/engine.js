@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=17';
+import { getProfile, update as updProfile } from './profile.js?v=18';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=17';
+import * as THREE from './three.module.min.js?v=18';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -215,7 +215,7 @@ export function makeUI(theme) {
   <div class="kg-hint" id="kg-hint">${isMobile ? 'Kéo bên trái để đi · vuốt bên phải để xoay' : 'WASD / phím mũi tên để đi · kéo chuột để xoay · E để tương tác'}</div>
   <div class="kg-acts"><button class="kg-btn main pe" id="kg-ctx" style="display:none"></button><div class="row" id="kg-acts"></div></div>
   <div class="kg-joy" id="kg-joy"><i></i></div><div class="kg-modal" id="kg-modal"><div class="kg-card" id="kg-card"></div></div><div class="kg-fade" id="kg-fade"></div>
-  ${theme.footer && !LIVE ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}${LIVE ? `<div class="kg-live">${LIVE_LABEL}</div>` : ''}`;
+  ${theme.footer && !LIVE ? `<div class="kg-foot pe">${theme.footer}</div>` : ''}${LIVE ? `<div class="kg-live">${LIVE_LABEL}</div><style>.kg-acts{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 48px)!important}</style>` : ''}`;
   document.body.appendChild(ui);
   const $ = (id) => ui.querySelector('#' + id);
   const api = {
@@ -333,7 +333,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=17', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=18', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;

@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=17';
-import { dailyTasks } from '../shared/daily.js?v=17';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=18';
+import { dailyTasks } from '../shared/daily.js?v=18';
 
 // ---------- terrain ----------
 const riverX = z => 6 * Math.sin(z * 0.035) + 2 * Math.sin(z * 0.11);
@@ -59,7 +59,7 @@ function makeBoat() { const g = new THREE.Group(); const hull = new THREE.Shape(
   const hg = new THREE.ExtrudeGeometry(hull, { depth: 4.2, bevelEnabled: false }); hg.translate(0, 0.25, -2.1); const hp = hg.attributes.position; for (let i = 0; i < hp.count; i++) { const z = hp.getZ(i), k = 1 - Math.pow(Math.abs(z) / 2.1, 3) * 0.7; hp.setX(i, hp.getX(i) * k); hp.setY(i, hp.getY(i) + Math.pow(Math.abs(z) / 2.1, 2) * 0.25); } hg.computeVertexNormals();
   g.add(mesh(hg, '#6a4426', { roughness: 0.7 })); for (let z of [-1.2, 0, 1.2]) { const b = mesh(new THREE.BoxGeometry(0.9, 0.05, 0.25), '#8a5a33'); b.position.set(0, 0.2, z); g.add(b); } return g; }
 function makeRower(ap) { return makeNPCav({ skin: '#d9a77c', hair: 'bui', top: '#4a3b6b', bottom: '#2b2b33', style: 'ao', hat: 'nonla', ...ap }); }
-import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=17';
+import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=18';
 function makeNPCav(ap) { return makeAvatar(ap); }
 const NAMES = ['Bà Tư', 'Cô Hạnh', 'Anh Tuấn', 'Chị Thảo', 'Bé Na', 'Chú Ba', 'Minh', 'Ngọc', 'Bác Lộc', 'Linh', 'Hùng', 'Cô Năm', 'Phúc', 'Vy', 'Trang', 'Long'];
 const OUTF = [{ top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' }, { top: '#8a6a4a', bottom: '#5a4632', style: 'aodai' }, { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' }, { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' }, { top: '#3e5b4a', bottom: '#2b2b2b', style: 'ao' }, { top: '#d9c38a', bottom: '#3a3a3a', style: 'ao' }];
@@ -246,5 +246,5 @@ window.__W = W;
 const clickAct = t => [...document.querySelectorAll('#kg-acts button')].find(b => b.textContent.includes(t))?.click();
 dailyTasks({ ui, ST, page: 'huong', icons, chime: () => S.chime(), tasks: [
   { id: 'do', icon: '🛶', text: 'Lên đò', hint: 'Ngồi đò ngắm suối Yến', keys: ['do'], go: () => clickAct('Lên đò') },
-  { id: 'huong', icon: '🪔', text: 'Thắp hương', hint: 'Đến lư hương ở sân chùa, bấm Thắp hương', keys: ['huong'], go: () => ui.fade(() => { W.player.riding = null; W.teleport(URN.x, URN.z + 2.4, Math.PI); ui.toast('Bấm nút “Thắp hương” ở dưới màn hình', 4500); }) },
-  { id: 'chuong', icon: '🔔', text: 'Thỉnh chuông', hint: 'Ở gác chuông sân chùa', keys: ['chuong'], go: () => ui.fade(() => { W.player.riding = null; W.teleport(BELL.x, BELL.z + 2.4, Math.PI); ui.toast('Bấm nút “Thỉnh chuông” ở dưới màn hình', 4500); }) }] });
+  { id: 'quet', icon: '🧹', text: 'Quét sân chùa', hint: 'Giúp nhà chùa quét lá ở sân', keys: ['quet'], go: () => ui.fade(() => { W.player.riding = null; W.teleport(PAG.x, -78 + 8, Math.PI); ui.toast('Cầm chổi quét hết lá trên sân nhé', 4500); }) }] });
+// Thắp hương, thỉnh chuông: việc tâm linh, không thưởng lá, không tính chuỗi ngày hay bộ đếm (như Tri Ân)
