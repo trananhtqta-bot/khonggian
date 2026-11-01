@@ -1,6 +1,6 @@
-import { getProfile, update as updProfile } from './profile.js?v=16';
+import { getProfile, update as updProfile } from './profile.js?v=17';
 // Dưới Gốc Thị - small 3D engine (our own code). three.js r164 vendored.
-import * as THREE from './three.module.min.js?v=16';
+import * as THREE from './three.module.min.js?v=17';
 export { THREE };
 export const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -333,7 +333,7 @@ export function createWorld(cfg) {
   }
   W.restorePos = () => { if (!cfg.saveKey) return false; try { const v = JSON.parse(localStorage.getItem('kg_pos_' + cfg.saveKey)); if (v && W.walkable(v[0], v[1])) { W.teleport(v[0], v[1], v[2]); return true; } } catch { } return false; };
   // PWA
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=16', import.meta.url)).catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(new URL('../sw.js?v=17', import.meta.url)).catch(() => { });
   W.start = () => requestAnimationFrame(step);
   W.camFocus = null;
   return W;
@@ -363,7 +363,7 @@ export function followPet(pet, target, yaw, dt, W) {
 }
 
 /* ---------------- creator (try-on: avatar shown in the live world) ---------------- */
-export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Không' }, hairs = HAIRS, pets, defaults = {}, namePH = 'Tên hiển thị', extraNote = '', goLabel = 'Vào thôi' }) {
+export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Không' }, hairs = HAIRS, pets, defaults = {}, namePH = 'Tên hiển thị', extraNote = '', goLabel = 'Vào thôi', hint = '', strict = false }) {
   return new Promise((resolve) => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key)); } catch { }
     let pc = null; try { pc = getProfile().character; } catch { }
@@ -372,16 +372,17 @@ export function avatarCreator(W, ui, { key, title, outfits, hats = { none: 'Khô
     const quick = !!(pc && pc.name);
     const base = { name: pc?.name || '', skin: pc?.appearance?.skin || SKINS[0], hair: pc?.appearance?.hair && hairs[pc.appearance.hair] ? pc.appearance.hair : 'ngan', outfit: outfits[0].id, hat: 'none', pet: pets ? Object.keys(pets)[0] : null, ...defaults };
     const st = saved ? { ...base, ...saved } : { ...base };
-    if (quick) { st.name = pc.name; if (!saved || !saved.custom) { st.skin = base.skin; st.hair = base.hair; } if (!saved || !saved.outfitPicked) st.top = pc.appearance.top; }
+    if (quick) { st.name = pc.name; if (!saved || !saved.custom) { st.skin = base.skin; st.hair = base.hair; } if (!strict && (!saved || !saved.outfitPicked)) st.top = pc.appearance.top; }
+    if (strict) delete st.top; // cảnh trang nghiêm: chỉ dùng trang phục phù hợp của cảnh, không lấy màu áo tự do
     const apOf = () => { const o = outfits.find(x => x.id === st.outfit) || outfits[0]; return { skin: st.skin, hair: st.hair, hat: st.hat, ...o.ap, ...(st.top && /^#[0-9a-f]{6}$/i.test(st.top) ? { top: st.top } : {}) }; };
     const refresh = () => { W.setAvatar(apOf(), st.name || 'Bạn'); W.setPet?.(st.pet); };
     const chips = (field, obj) => Object.entries(obj).map(([k, v]) => `<button class="kg-chip ${st[field] === k ? 'on' : ''}" data-f="${field}" data-v="${k}">${v}</button>`).join('');
     function openPanel(done) {
       const box = document.createElement('div'); box.className = 'kg-creator';
-      box.innerHTML = `<h2>${quick ? 'Trang phục cho cảnh này' : title}</h2>${quick ? '' : extraNote}${quick ? '' : `<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${cleanName(st.name || '')}"></div>`}
+      box.innerHTML = `<h2>${quick ? 'Trang phục cho cảnh này' : title}</h2>${hint ? `<p class="kg-ohint" style="margin:2px 0 8px;font-size:16px;opacity:.9">💡 ${hint}</p>` : ''}${quick ? '' : extraNote}${quick ? '' : `<div class="kg-row"><span>Tên</span><input class="kg-in" id="kgc-name" maxlength="16" placeholder="${namePH}" value="${cleanName(st.name || '')}"></div>`}
       <div class="kg-row"><span>Màu da</span><div class="kg-chips">${SKINS.map(s => `<button class="kg-chip kg-sw ${st.skin === s ? 'on' : ''}" style="background:${s}" data-f="skin" data-v="${s}"></button>`).join('')}</div></div>
       <div class="kg-row"><span>Kiểu tóc</span><div class="kg-chips">${chips('hair', hairs)}</div></div>
-      <div class="kg-row"><span>Trang phục</span><div class="kg-chips">${chips('outfit', Object.fromEntries(outfits.map(o => [o.id, o.label])))}</div></div>
+      <div class="kg-row"><span>Trang phục</span><div class="kg-chips">${chips('outfit', Object.fromEntries(outfits.map((o, i) => [o.id, o.label + (hint && i === 0 ? ' · gợi ý' : '')])))}</div></div>
       ${Object.keys(hats).length > 1 ? `<div class="kg-row"><span>Phụ kiện</span><div class="kg-chips">${chips('hat', hats)}</div></div>` : ''}
       ${pets ? `<div class="kg-row"><span>Bạn đồng hành</span><div class="kg-chips">${chips('pet', pets)}</div></div>` : ''}
       <button class="kg-btn main" id="kgc-go" style="width:100%;margin-top:10px;font-size:18px;min-height:52px">${quick ? 'Xong' : goLabel}</button>`;

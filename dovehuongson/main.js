@@ -1,5 +1,5 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=16';
-import { dailyTasks } from '../shared/daily.js?v=16';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, waterMaterial, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, beadsView, reader, bow, stats, isMobile, begoButton, doneCard, MOVE_TUT, LIVE } from '../shared/engine.js?v=17';
+import { dailyTasks } from '../shared/daily.js?v=17';
 
 // ---------- terrain ----------
 const riverX = z => 6 * Math.sin(z * 0.035) + 2 * Math.sin(z * 0.11);
@@ -59,7 +59,7 @@ function makeBoat() { const g = new THREE.Group(); const hull = new THREE.Shape(
   const hg = new THREE.ExtrudeGeometry(hull, { depth: 4.2, bevelEnabled: false }); hg.translate(0, 0.25, -2.1); const hp = hg.attributes.position; for (let i = 0; i < hp.count; i++) { const z = hp.getZ(i), k = 1 - Math.pow(Math.abs(z) / 2.1, 3) * 0.7; hp.setX(i, hp.getX(i) * k); hp.setY(i, hp.getY(i) + Math.pow(Math.abs(z) / 2.1, 2) * 0.25); } hg.computeVertexNormals();
   g.add(mesh(hg, '#6a4426', { roughness: 0.7 })); for (let z of [-1.2, 0, 1.2]) { const b = mesh(new THREE.BoxGeometry(0.9, 0.05, 0.25), '#8a5a33'); b.position.set(0, 0.2, z); g.add(b); } return g; }
 function makeRower(ap) { return makeNPCav({ skin: '#d9a77c', hair: 'bui', top: '#4a3b6b', bottom: '#2b2b33', style: 'ao', hat: 'nonla', ...ap }); }
-import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=16';
+import { makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=17';
 function makeNPCav(ap) { return makeAvatar(ap); }
 const NAMES = ['Bà Tư', 'Cô Hạnh', 'Anh Tuấn', 'Chị Thảo', 'Bé Na', 'Chú Ba', 'Minh', 'Ngọc', 'Bác Lộc', 'Linh', 'Hùng', 'Cô Năm', 'Phúc', 'Vy', 'Trang', 'Long'];
 const OUTF = [{ top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' }, { top: '#8a6a4a', bottom: '#5a4632', style: 'aodai' }, { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' }, { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' }, { top: '#3e5b4a', bottom: '#2b2b2b', style: 'ao' }, { top: '#d9c38a', bottom: '#3a3a3a', style: 'ao' }];
@@ -236,7 +236,7 @@ for (let i = 0; i < 4; i++) floatLantern(riverX(-50 + i * 12) + rnd(-2, 2), -50 
 let ambient = false; W.onFirstInput = () => { if (ambient) return; ambient = true; S.init(); S.ambient('water', 0.18); S.ambient('birds', 0.0); startMusic(); };
 W.start(); document.getElementById('load').style.opacity = 0; setTimeout(() => document.getElementById('load').remove(), 700);
 refGreeting(ui, r => `${r} mời bạn cùng trẩy hội Hương Sơn 🙏`);
-await avatarCreator(W, ui, { key: 'kg_av_huong', title: 'Sửa soạn đi trẩy hội', namePH: 'Tên / pháp danh', outfits: [{ id: 'trang', label: 'Áo tràng lam', ap: { top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' } }, { id: 'nau', label: 'Áo nâu sồng', ap: { top: '#8a6a4a', bottom: '#6a523a', style: 'aodai' } }, { id: 'aodai_do', label: 'Áo dài đỏ', ap: { top: '#b33a2e', bottom: '#f0e8d8', style: 'aodai' } }, { id: 'aodai_trang', label: 'Áo dài trắng', ap: { top: '#f3efe4', bottom: '#f3efe4', style: 'aodai' } }, { id: 'baba', label: 'Áo bà ba', ap: { top: '#d9c38a', bottom: '#2f2f2f', style: 'ao' } }, { id: 'tuthan', label: 'Áo tứ thân', ap: { top: '#8b4a2b', bottom: '#d0402a', style: 'yem' } }],
+await avatarCreator(W, ui, { key: 'kg_av_huong', title: 'Sửa soạn đi trẩy hội', namePH: 'Tên / pháp danh', hint: 'Lên chùa nên mặc kín đáo, màu nhã: áo tràng, áo dài kín, sơ mi dài tay và quần dài.', strict: true, outfits: [{ id: 'trang', label: 'Áo tràng lam (phật tử)', ap: { top: '#6f8fb8', bottom: '#6f8fb8', style: 'aodai' } }, { id: 'nau', label: 'Áo tràng nâu', ap: { top: '#8a6a4a', bottom: '#6a523a', style: 'aodai' } }, { id: 'aodai_kem', label: 'Áo dài màu kem', ap: { top: '#e8dcc0', bottom: '#e8dcc0', style: 'aodai' } }, { id: 'aodai_xam', label: 'Áo dài xám nhạt', ap: { top: '#a9a9a4', bottom: '#d8d4ca', style: 'aodai' } }, { id: 'somi', label: 'Sơ mi dài tay, quần dài', ap: { top: '#e9e6dc', bottom: '#3a3f4a', style: 'ao' } }],
   hats: { none: 'Không', nonla: 'Nón lá', khan: 'Khăn vấn' }, pets: { none: 'Không', dog: 'Chó vàng', cat: 'Mèo mướp', buffalo: 'Nghé con' } });
 if (!ambient) W.onFirstInput();
 W.restorePos(); ui.tutorial('move', MOVE_TUT);

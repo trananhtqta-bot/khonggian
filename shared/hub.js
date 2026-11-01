@@ -1,6 +1,6 @@
 // Hub: tạo nhân vật, thẻ nhân vật, nhà riêng, mã nhà
-import { load as loadDaily, doneToday } from './daily.js?v=16';
-import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=16';
+import { load as loadDaily, doneToday } from './daily.js?v=17';
+import { getProfile, update, hasCharacter, levelOf, SKILLS, SHOP, UPGRADES, buyItem, buyUpgrade, getCode, useCode, syncOnLoad, schedulePush, deleteHouse } from './profile.js?v=17';
 const LIVE = !!window.KG_LIVE;
 const $ = s => document.querySelector(s);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
