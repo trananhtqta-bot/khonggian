@@ -1,11 +1,11 @@
-import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=5';
+import { THREE, createWorld, makeUI, mesh, mat, rnd, pick, label, Sound, addNPC, makePet, followPet, avatarCreator, mapView, shareInvite, refGreeting, leafPatch, broom, reader, bow, stats, isMobile, begoButton, qrPlaceholder, doneCard, MOVE_TUT, makeAvatar, setNameTag, animateAvatar } from '../shared/engine.js?v=6';
 
 const B = { x0: -8, x1: 8, z0: -24, z1: -12 }; // classroom
 const inside = (x, z) => x > B.x0 && x < B.x1 && z > B.z0 && z < B.z1;
 const walkable = (x, z) => x > -21 && x < 21 && z > -25 && z < 19;
 const W = createWorld({ fog: ['#f6e6c8', 30, 110], sky: ['#8fc6e8', '#fdf0d4', '#fff1c0'], hemi: ['#fff6e0', '#7a8f4a', 1.3], sun: ['#fff0cc', 2.3], sunDir: [18, 30, 22], spawn: [-1.6, 0, 10.5], spawnYaw: Math.PI, saveKey: 'mg', heightAt: (x, z) => inside(x, z) ? 0.15 : 0, walkable, meColor: '#ffd36b' });
 const S = W.sound = new Sound();
-const ui = W.ui = makeUI({ title: 'Lớp Mẫu Giáo Ngày Xưa', sub: '<span id="phase">Giờ học</span> · <span id="online">…</span>', accent: '#c0392b', panel: '#fff8e8d9', panelSolid: '#fff8e8', glow: '#ffc85a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
+const ui = W.ui = makeUI({ title: 'Lớp Mẫu Giáo Ngày Xưa', sub: '<span id="phase">Giờ học</span>', accent: '#c0392b', panel: '#fff8e8d9', panelSolid: '#fff8e8', glow: '#ffc85a66', footer: '<a href="https://facebook.com/begotrensong" target="_blank" rel="noopener">Bè Gỗ Trên Sông</a>' });
 const ST = stats(ui, 'mg');
 
 // ---------- ground ----------
@@ -168,8 +168,6 @@ icons('🎁', 'Ủng hộ', () => ui.modal(`<h2>Ủng hộ Bè Gỗ</h2><p style
 icons('🔊', 'Âm thanh', b => { if (S.musicOn) { S.stopMusic(); b.firstChild.textContent = '🔇'; } else { startMusic(); b.firstChild.textContent = '🔊'; } });
 function startMusic() { S.init(); S.stopMusic(); S.music({ scale: [0, 2, 4, 7, 9], root: 392, beat: 0.42, inst: 'pluck', rest: 0.25 }); }
 
-const online = () => { const e = document.getElementById('online'); if (e) e.textContent = `${90 + (Math.random() * 30 | 0)} bạn cùng lớp online`; }; online(); setInterval(online, 9000);
-setInterval(() => { const n = pick(['Tí', 'Tèo', 'Bống', 'Na', 'Mít', 'Gạo']) + ' (' + pick(['Hà Nội', 'Huế', 'Sài Gòn', 'Cần Thơ', 'Đà Nẵng']) + ')'; ui.feed(pick([`${n} vừa đánh trống trường`, `${n} được bông hoa bé ngoan 🌸`, `${n} đang hát Chi chi chành chành`, `${n} vừa trượt cầu trượt`])); }, 10000);
 
 let amb = false; W.onFirstInput = () => { if (amb) return; amb = true; S.init(); S.ambient('birds', 0.12); startMusic(); };
 W.start(); document.getElementById('load').style.opacity = 0; setTimeout(() => document.getElementById('load').remove(), 700);
