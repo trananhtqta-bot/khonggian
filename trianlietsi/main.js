@@ -30,6 +30,7 @@ const MON = { x: 0, z: 0 }; { const g = new THREE.Group(); const b1 = mesh(new T
   g.position.set(MON.x, 0, MON.z); W.scene.add(g); W.addBox(0, 0, 1.7, 1.7); W.addCollider(0, 2.6, 0.7); }
 // graves (instanced)
 const graves = []; { for (let z = -6; z >= -46; z -= 3.2) for (let x of [-18, -15, -12, -9, -6, 6, 9, 12, 15, 18]) if (!(z > -26 && z < -22)) graves.push({ x, z });
+  graves.forEach(g => W.addBox(g.x, g.z - 0.1, 0.85, 1.15)); // không đứng lên mộ
   const N = graves.length, base = new THREE.InstancedMesh(new THREE.BoxGeometry(1.4, 0.35, 2), mat('#c9c0ae'), N), head = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 1, 0.18), mat('#e3dccb'), N), star = new THREE.InstancedMesh(new THREE.CircleGeometry(0.17, 5), new THREE.MeshBasicMaterial({ color: '#d8b04a' }), N);
   const m4 = new THREE.Matrix4(); graves.forEach((g, i) => { m4.makeTranslation(g.x, 0.17, g.z); base.setMatrixAt(i, m4); m4.makeTranslation(g.x, 0.75, g.z - 0.9); head.setMatrixAt(i, m4); m4.makeRotationZ(Math.PI / 2).setPosition(g.x, 1.05, g.z - 0.8); star.setMatrixAt(i, m4); W.addBox(g.x, g.z - 0.1, 0.7, 1); });
   base.receiveShadow = head.castShadow = true; W.scene.add(base, head, star);
@@ -74,9 +75,9 @@ const vSpots = [-10, -20, -30, -40].flatMap(z => [[-2.2, z, -Math.PI / 2, 'stand
 for (let i = 0; i < (isMobile ? 5 : 8); i++) addNPC(W, { name: NAMES[i], ap: vAp(), area: [-4, 4, -45, 38], spots: [...vSpots, [0, 4.2, Math.PI, 'stand']], speed: 0.9 }); // (visitors walk only along the central avenue)
 
 // nearest grave interaction
-const G = { pos: { x: 0, z: 0 }, r: 1.9, label: '🕯️ Thắp hương', use: () => doIncense() };
+const G = { pos: { x: 0, z: 0 }, r: 2.5, label: '🕯️ Thắp hương', use: () => doIncense() };
 W.addInteract(G); let near = null;
-W.onUpdate(() => { const P = W.player.pos; let b = null, bd = 99; for (const g of graves) { const d = Math.hypot(g.x - P.x, g.z + 1.3 - P.z); if (d < bd) { bd = d; b = g; } } near = bd < 2 ? b : null; if (b) { G.pos.x = b.x; G.pos.z = b.z + 1.3; } G.enabled = !!near; });
+W.onUpdate(() => { const P = W.player.pos; let b = null, bd = 99; for (const g of graves) { const d = Math.hypot(g.x - P.x, g.z + 1.3 - P.z); if (d < bd) { bd = d; b = g; } } near = bd < 2.5 ? b : null; if (b) { G.pos.x = b.x; G.pos.z = b.z + 1.3; } G.enabled = !!near; });
 function doIncense() { if (near) { incense(near.x - 0.3, near.z - 0.6, 0.35); bow(W.player.av); S.bell(110, 0.12); ST.add('huong'); ui.toast('Nén hương thơm dâng lên người đã khuất'); } }
 W.addInteract({ pos: { x: 0, z: 3.8 }, r: 2.4, label: '🕯️ Dâng hương Đài tưởng niệm', use: () => { incense(0, 2.6, 1.3); bow(W.player.av); S.bell(98, 0.2); ST.add('huong'); ui.toast('Kính cẩn nghiêng mình trước anh linh các anh hùng liệt sĩ'); } });
 W.addInteract({ pos: { x: WALL.x, z: WALL.z + 2 }, r: 3, label: '✍️ Viết lời tri ân', use: () => writeMsg() });
@@ -98,7 +99,7 @@ const sw = W.addInteract({ pos: { x: 4.2, z: -7.4 }, r: 1.6, label: '🧹 Quét 
 // actions
 ui.button('kg-acts', '💐 Đặt hoa', () => { if (!near) return ui.toast('Hãy lại gần một phần mộ'); flowers(near.x + 0.35, near.z - 0.55, 0.35); bow(W.player.av); S.chime(); ST.add('hoa'); });
 ui.button('kg-acts', '🙇 Mặc niệm', () => silence());
-ui.button('kg-acts', '📜 Thơ', () => reader(ui, { title: 'Lời tưởng niệm', sub: 'Đọc chậm, nhẹ', lines: ['Hàng bia trắng lặng im', 'giữa nắng gió quê nhà.', 'Mỗi cái tên khắc đá', 'là một mùa xuân xa.', 'Chúng con đứng nơi đây,', 'cúi đầu và nhớ mãi', 'những người đã đi qua', 'để hôm nay bình yên.', '(Lời: Dưới Gốc Thị)'], beat: 3.2, onLine: () => S.pluck(220, 0, 0.05), onEnd: () => S.bell(98, 0.12) }));
+ui.button('kg-acts', '📜 Thơ', () => reader(ui, { title: 'Lời tưởng niệm', sub: 'Đọc chậm, nhẹ', verb: 'Đang đọc', lines: ['Hàng bia trắng lặng im', 'giữa nắng gió quê nhà.', 'Mỗi cái tên khắc đá', 'là một mùa xuân xa.', 'Chúng con đứng nơi đây,', 'cúi đầu và nhớ mãi', 'những người đã đi qua', 'để hôm nay bình yên.', '(Lời: Dưới Gốc Thị)'], beat: 3.2, onLine: () => S.pluck(220, 0, 0.05), onEnd: () => S.bell(98, 0.12) }));
 function silence() { const a = W.player.av; W.frozen = true; a.pray = true; S.stopMusic(); let n = 60; ui.modal(`<h2>Phút mặc niệm</h2><p style="text-align:center;font-size:48px;margin:8px" id="sl">60</p><p style="text-align:center;opacity:.7">Đứng nghiêm, cúi đầu tưởng nhớ</p><button class="kg-btn" id="st" style="width:100%">Kết thúc</button>`, c => { const end = () => { clearInterval(iv); W.frozen = false; a.pray = false; ui.close(); bow(a); S.bell(98, 0.2); ST.add('macniem'); startMusic(); }; c.querySelector('#st').onclick = end; const iv = setInterval(() => { n--; const e = c.querySelector('#sl'); if (e) e.textContent = n; if (n % 15 === 0) S.bell(82, 0.08); if (n <= 0) end(); }, 1000); }); S.bell(82, 0.15); }
 const icons = (t, l, f) => ui.button('kg-icons', `<span>${t}</span><small>${l}</small>`, f);
 icons('🗺️', 'Bản đồ', () => mapView(W, ui, [{ label: 'Cổng nghĩa trang', icon: '⛩️', desc: 'Lối vào', pos: [0, 40], yaw: Math.PI }, { label: 'Đài tưởng niệm', icon: '🕯️', desc: 'Dâng hương chung', pos: [0, 5], yaw: Math.PI }, { label: 'Khu mộ', icon: '🪦', desc: 'Thắp hương, đặt hoa, quét lá', pos: [4.6, -24], yaw: Math.PI / 2 }, { label: 'Tường tri ân', icon: '✍️', desc: 'Khắc lời tưởng nhớ', pos: [0, -46], yaw: Math.PI }], 'Sơ đồ nghĩa trang'));
@@ -122,6 +123,6 @@ window.__W = W;
 const clickAct = t => [...document.querySelectorAll('#kg-acts button')].find(b => b.textContent.includes(t))?.click();
 const toGraves = m => ui.fade(() => { W.teleport(4.6, -24, Math.PI / 2); ui.toast(m, 5000); });
 dailyTasks({ ui, ST, page: 'trian', icons, solemn: true, tasks: [
-  { id: 'huong', icon: '🕯️', text: 'Thắp một nén hương', hint: 'Tại khu mộ hoặc đài tưởng niệm', keys: ['huong'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Thắp hương”') },
-  { id: 'hoa', icon: '💐', text: 'Đặt một bó hoa', hint: 'Trước một phần mộ', keys: ['hoa'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Đặt hoa”') },
-  { id: 'macniem', icon: '🙇', text: 'Mặc niệm', hint: 'Đứng lặng, cúi đầu tưởng nhớ', keys: ['macniem'], go: () => clickAct('Mặc niệm') }] });
+  { id: 'huong', icon: '🕯️', text: 'Thắp một nén hương', hint: 'Đến Đài tưởng niệm (Bản đồ), bấm Dâng hương', doneMsg: 'Đã dâng hương', keys: ['huong'], go: () => ui.fade(() => { W.teleport(0, 5.4, Math.PI); ui.toast('Bấm “Dâng hương Đài tưởng niệm” ở dưới màn hình', 5000); }) },
+  { id: 'hoa', icon: '💐', text: 'Đặt một bó hoa', hint: 'Trước một phần mộ', doneMsg: 'Đã dâng hoa', keys: ['hoa'], go: () => toGraves('Lại gần một phần mộ rồi bấm “Đặt hoa”') },
+  { id: 'macniem', icon: '🙇', text: 'Mặc niệm', doneMsg: 'Đã mặc niệm', hint: 'Đứng lặng, cúi đầu tưởng nhớ', keys: ['macniem'], go: () => clickAct('Mặc niệm') }] });

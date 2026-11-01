@@ -319,6 +319,7 @@ export function createWorld(cfg) {
     if (W.occluders.length) { rcDir.subVectors(camP, camT); const L = rcDir.length(); rcDir.normalize(); ray.set(camT, rcDir); ray.far = L;
       const hit = ray.intersectObjects(W.occluders, true).find(h => h.object.visible && h.object.material && !(h.object.material.transparent && h.object.material.opacity < 0.5) && !h.object.userData.noOcc);
       if (hit) camP.copy(camT).addScaledVector(rcDir, Math.max(0.6, hit.distance - 0.35)); }
+    { const gy = W.heightAt(camP.x, camP.z) + 0.45; if (camP.y < gy) camP.y = gy; } // camera never below ground
     if (W.camFade) W.camFade(camera.position, camT);
     if (first) { camera.position.copy(camP); first = false; } else camera.position.lerp(camP, Math.min(1, dt * 8));
     camera.lookAt(camT);
@@ -424,8 +425,9 @@ export function beadsView(ui, { title = 'Tràng hạt', mantra = '', total = 108
     ring.onpointerdown = tap; const k = e => { if (e.code === 'Space') { e.preventDefault(); tap(); } }; addEventListener('keydown', k); card._off = () => removeEventListener('keydown', k);
   });
 }
-export function reader(ui, { title, sub, lines, beat = 2.2, onLine, onEnd }) {
-  ui.modal(`<h2>${title}</h2>${sub ? `<p style="text-align:center;font-size:12px;opacity:.7;margin:-4px 0 8px">${sub}</p>` : ''}<div id="rd" style="font-size:17px;line-height:1.8;text-align:center"></div>`, card => {
+export function reader(ui, { title, sub, lines, beat = 2.2, onLine, onEnd, verb = 'Đang đọc' }) {
+  ui.modal(`<h2>${title}</h2>${sub ? `<p style="text-align:center;font-size:12px;opacity:.7;margin:-4px 0 8px">${sub}</p>` : ''}<div id="rd" style="font-size:17px;line-height:1.8;text-align:center"></div><p id="rdp" style="text-align:center;font-size:14px;opacity:.75;margin:8px 0 0"></p>`, card => {
+    const rdp = card.querySelector('#rdp'), T0 = Date.now(), TT = lines.length * beat; const tk = setInterval(() => { if (ui.$('kg-modal').style.display === 'none') return clearInterval(tk); const left = Math.max(0, Math.ceil(TT - (Date.now() - T0) / 1000)); rdp.textContent = left ? `${verb}… còn ${left} giây` : 'Xong'; if (!left) clearInterval(tk); }, 250);
     const rd = card.querySelector('#rd'); rd.innerHTML = lines.map((l, i) => `<div data-i="${i}" style="opacity:.35;transition:all .4s">${l}</div>`).join('');
     let i = 0; const go = () => { if (ui.$('kg-modal').style.display === 'none') return; rd.querySelectorAll('div').forEach((d, j) => { d.style.opacity = j === i ? 1 : j < i ? .55 : .35; d.style.fontWeight = j === i ? 700 : 400; d.style.color = j === i ? 'var(--accent)' : ''; });
       rd.children[i]?.scrollIntoView({ block: 'center', behavior: 'smooth' }); onLine?.(i, lines[i]); i++; if (i < lines.length) setTimeout(go, beat * 1000); else setTimeout(() => onEnd?.(), beat * 1000); }; go(); });

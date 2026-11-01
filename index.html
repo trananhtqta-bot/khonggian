@@ -42,5 +42,5 @@ const next = [1, 3, 7, 14, 30][stage];
 document.getElementById('cap').innerHTML = total === 0 ? 'Làm một việc nhỏ ở bất kỳ nơi nào bên dưới<br>để gieo hạt thị của bạn 🌱'
   : `${names[stage]}<br>Bạn đã chăm cây <b>${total}</b> ngày${st > 1 ? ` · <b>${st}</b> ngày liền` : ''}`;
 const away = total > 0 && !todayDone ? awayDays(s) : 0;
-document.getElementById('sub').textContent = total === 0 ? '' : away >= 1 ? 'Cây thị vẫn đợi bạn 🌱 Làm một việc nhỏ là cây vui trở lại.' : (todayDone ? 'Hôm nay cây đã được chăm. Mai ghé lại nhé.' : 'Hôm nay cây chưa được chăm. Làm một việc nhỏ là đủ.') + (next ? ` Còn ${next - total} ngày nữa cây sẽ lớn thêm.` : '');
+document.getElementById('sub').textContent = total === 0 ? 'Ghé mỗi ngày, làm một việc nhỏ, cây thị sẽ lớn dần.' : away >= 1 ? 'Cây thị vẫn đợi bạn 🌱 Làm một việc nhỏ là cây vui trở lại.' : (todayDone ? 'Hôm nay cây đã được chăm. Mai ghé lại nhé.' : 'Hôm nay cây chưa được chăm. Làm một việc nhỏ là đủ.') + (next ? ` Còn ${next - total} ngày nữa cây sẽ lớn thêm.` : '');
 </script><p style="font-size:13px;opacity:.65;max-width:380px;margin:28px auto 0">Trải nghiệm mô phỏng văn hóa, không thay thế nghi lễ thật · Dữ liệu chỉ lưu trên máy bạn</p></body></html>

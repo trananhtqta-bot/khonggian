@@ -29,7 +29,7 @@ export function dailyTasks({ ui, ST, page, tasks, icons, solemn = false, chime }
   const label = () => `<span>📋</span><small>Hôm nay ${n()}/${tasks.length}</small>`;
   const refresh = () => { if (btn) btn.innerHTML = label(); };
   ST.add = (k, v) => { const r = add0(k, v); const t = tasks.find(t => t.keys.includes(k)); if (t) { const m = mark(page, t.id); if (m.fresh) { refresh(); const all = n() === tasks.length;
-        const msg = solemn ? (all ? 'Đã làm trọn việc tri ân hôm nay. Xin cảm ơn bạn.' : `Đã xong: ${t.text}`) : (all ? `Xong hết việc hôm nay! Cây thị của bạn được chăm thêm một ngày 🌱` : `✔ Đã xong: ${t.text}`);
+        const msg = solemn ? (all ? 'Xin cảm ơn bạn đã đến viếng' : (t.doneMsg || 'Xin cảm ơn bạn')) : (all ? 'Hôm nay bạn đã trọn một ngày an lành · cây thị đã được chăm 🌱' : `✔ Đã xong: ${t.text}`);
         setTimeout(() => ui.toast(msg, 3500), 600); if (!solemn && chime) chime(); } } return r; };
   const open = () => { const done = doneToday(page), st = streakNow();
     ui.modal(`<h2>Việc nhỏ hôm nay</h2>${solemn ? '<p style="text-align:center;font-size:16px;margin:4px 0 10px;opacity:.8">Những việc tri ân lặng lẽ, không tính điểm.</p>' : `<p style="text-align:center;font-size:18px;margin:4px 0 10px">${st ? `Bạn đã ghé <b>${st}</b> ngày liền` : 'Làm một việc nhỏ để bắt đầu chuỗi ngày'}</p><p style="text-align:center;font-size:14px;opacity:.7;margin:-4px 0 8px">Mỗi tuần được nghỉ 1 ngày mà chuỗi vẫn giữ.</p>`}
